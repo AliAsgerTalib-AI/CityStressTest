@@ -1,0 +1,6 @@
+{
+  "name": "Sovereign Asset Stress Test Terminal",
+  "description": "An elite Sovereign Wealth Board terminal providing brutal, unsentimental time-horizon asset appraisals and localized climate stress-testing over 100 years.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
