@@ -82,16 +82,6 @@ function buildGeographicMetrics(context: GeographicScaleContext): any {
     flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
   });
 
-  Object.entries(context.climateMigration).forEach(([key, signal]) => {
-    flatMetrics[key] = signal.value;
-    flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
-  });
-
-  Object.entries(context.socialFabric).forEach(([key, signal]) => {
-    flatMetrics[key] = signal.value;
-    flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
-  });
-
   return flatMetrics;
 }
 

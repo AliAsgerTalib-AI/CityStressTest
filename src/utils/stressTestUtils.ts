@@ -824,64 +824,40 @@ export function modulateReportWithSensitivity(report: StressTestReport, sensitiv
 }
 
 export function generateEconomicViability(municipality: string, horizons: number[]): {
-  municipalDebtRatio: GeographicSignal;
-  taxCollectionRate: GeographicSignal;
-  commercialVacancyRate: GeographicSignal;
-  businessFormationRate: GeographicSignal;
+  medianHouseholdIncome: GeographicSignal;
+  povertyRate: GeographicSignal;
+  unemploymentRate: GeographicSignal;
 } {
   return {
-    municipalDebtRatio: createProceduregeographicSignal(
-      'Municipal Debt Ratio',
-      '45%',
-      '40%',
-      '52%',
-      'Municipal debt grows as infrastructure repair costs accumulate. Tax base erosion accelerates if property values decline.'
+    medianHouseholdIncome: createProceduregeographicSignal(
+      'Median Household Income',
+      '$75,000',
+      '$68,000',
+      '$82,000',
+      'Median household income declines as job losses accelerate from climate-related business closures. Out-migration of higher-income households amplifies this effect.'
     ),
-    taxCollectionRate: createProceduregeographicSignal(
-      'Tax Collection Rate',
-      '92%',
-      '88%',
-      '95%',
-      'Tax collection rates decline as property values fall and owners abandon properties. Climate stress accelerates this trend.'
+    povertyRate: createProceduregeographicSignal(
+      'Poverty Rate',
+      '14%',
+      '10%',
+      '22%',
+      'Poverty rate rises as employment opportunities shrink and property values decline. Climate stress disproportionately impacts vulnerable populations.'
     ),
-    commercialVacancyRate: createProceduregeographicSignal(
-      'Commercial Vacancy Rate',
-      '8%',
-      '6%',
-      '15%',
-      'Commercial vacancy rises as businesses relocate from climate-stressed regions. Economic decline accelerates if major employers leave.'
-    ),
-    businessFormationRate: createProceduregeographicSignal(
-      'Business Formation Rate',
-      '3.2%/year',
-      '1.5%/year',
-      '4.8%/year',
-      'Business formation is driven by economic confidence and available labor. Climate stress reduces both, reducing new business startup rates.'
+    unemploymentRate: createProceduregeographicSignal(
+      'Unemployment Rate',
+      '5.2%',
+      '3.8%',
+      '8.5%',
+      'Unemployment increases as businesses relocate and the economy contracts. Labor force participation declines as people leave the region.'
     ),
   };
 }
 
 export function generateInfrastructureResilience(municipality: string, horizons: number[]): {
-  utilitySystemAge: GeographicSignal;
-  electricalGridStress: GeographicSignal;
   broadbandAvailability: GeographicSignal;
-  roadMaintenanceBacklog: GeographicSignal;
+  utilitySystemAge: GeographicSignal;
 } {
   return {
-    utilitySystemAge: createProceduregeographicSignal(
-      'Utility System Age',
-      '35 years avg',
-      '28 years',
-      '42 years',
-      'Aging utility infrastructure requires increasing maintenance. Climate stress (floods, heat) accelerates degradation and failures.'
-    ),
-    electricalGridStress: createProceduregeographicSignal(
-      'Electrical Grid Stress',
-      '78% peak capacity',
-      '72%',
-      '88%',
-      'Grid stress increases with population growth and increased cooling demand from heat. Outages become more frequent as stress approaches 85%+.'
-    ),
     broadbandAvailability: createProceduregeographicSignal(
       'Broadband Availability',
       '88% population covered',
@@ -889,50 +865,50 @@ export function generateInfrastructureResilience(municipality: string, horizons:
       '92%',
       'Broadband expansion depends on municipal investment. Climate disasters can disrupt service and reduce future investment as fiscal stress increases.'
     ),
-    roadMaintenanceBacklog: createProceduregeographicSignal(
-      'Road Maintenance Backlog',
-      '$45M estimated',
-      '$35M',
-      '$65M',
-      'Road maintenance backlogs grow as municipal budgets are strained by climate adaptation. Deferred maintenance leads to rapid deterioration.'
+    utilitySystemAge: createProceduregeographicSignal(
+      'Utility System Age',
+      '35 years avg',
+      '28 years',
+      '42 years',
+      'Aging utility infrastructure requires increasing maintenance. Climate stress (floods, heat) accelerates degradation and failures.'
     ),
   };
 }
 
 export function generateDemographicTrends(censusTract: string, horizons: number[]): {
+  population: GeographicSignal;
+  ageDistribution: GeographicSignal;
+  educationLevel: GeographicSignal;
   netMigrationRate: GeographicSignal;
-  populationGrowth: GeographicSignal;
-  ageDistributionShift: GeographicSignal;
-  educationLevelChange: GeographicSignal;
 } {
   return {
+    population: createProceduregeographicSignal(
+      'Population',
+      '245,000',
+      '220,000',
+      '270,000',
+      'Population declines as out-migration exceeds natural increase. This compounds fiscal stress: shrinking tax base, fewer workers.'
+    ),
+    ageDistribution: createProceduregeographicSignal(
+      'Age Distribution',
+      'Median age 41 years',
+      '38 years',
+      '44 years',
+      'Population aging accelerates as young adults migrate away. Higher dependency ratios increase municipal service costs.'
+    ),
+    educationLevel: createProceduregeographicSignal(
+      'Education Level',
+      '32% Bachelor\'s degree or higher',
+      '28%',
+      '38%',
+      'Education levels may rise in-place (remaining population more educated) or stagnate if out-migration is selective. Trend depends on local economy.'
+    ),
     netMigrationRate: createProceduregeographicSignal(
       'Net Migration Rate',
       '-0.5%/year',
       '-2.0%/year',
       '+0.8%/year',
       'Net migration turns negative as climate stress increases. People relocate to safer regions; this accelerates as climate impacts worsen.'
-    ),
-    populationGrowth: createProceduregeographicSignal(
-      'Population Growth',
-      '-1.2%/year',
-      '-2.5%/year',
-      '-0.1%/year',
-      'Population declines as out-migration exceeds natural increase. This compounds fiscal stress: shrinking tax base, fewer workers.'
-    ),
-    ageDistributionShift: createProceduregeographicSignal(
-      'Age Distribution Shift',
-      'Median age +1.5 years/decade',
-      '+1.0 years/decade',
-      '+2.2 years/decade',
-      'Population aging accelerates as young adults migrate away. Higher dependency ratios increase municipal service costs.'
-    ),
-    educationLevelChange: createProceduregeographicSignal(
-      'Education Level Change',
-      'Bachelor\'s degree +3.2% per decade',
-      '+1.5%',
-      '+5.0%',
-      'Education levels may rise in-place (remaining population more educated) or stagnate if out-migration is selective. Trend depends on local economy.'
     ),
   };
 }

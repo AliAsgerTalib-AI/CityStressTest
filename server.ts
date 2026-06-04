@@ -16,8 +16,6 @@ import {
   generateEconomicViability,
   generateInfrastructureResilience,
   generateDemographicTrends,
-  generateClimateMigration,
-  generateSocialFabric,
 } from "./src/utils/stressTestUtils.js";
 
 dotenv.config();
@@ -591,24 +589,12 @@ app.post("/api/stress-test", async (req, res) => {
         const geocoded = await reverseGeocodeAddress(address);
 
         // Try to fetch real APIs; fall back to procedural if unavailable
-        const neighborhood = {
-          scale: 'neighborhood' as const,
-          location: geocoded.censusTract,
-          economicViability: generateEconomicViability(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
-          infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
-          demographicTrends: generateDemographicTrends(geocoded.censusTract, proceduralReport.projections.map(p => p.horizon)),
-          climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, proceduralReport.projections.map(p => p.horizon)),
-          socialFabric: generateSocialFabric(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
-        };
-
         const city = {
           scale: 'city' as const,
           location: geocoded.municipality,
           economicViability: generateEconomicViability(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
           infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
           demographicTrends: generateDemographicTrends(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
-          climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, proceduralReport.projections.map(p => p.horizon)),
-          socialFabric: generateSocialFabric(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
         };
 
         const region = {
@@ -617,11 +603,9 @@ app.post("/api/stress-test", async (req, res) => {
           economicViability: generateEconomicViability(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
           infrastructureResilience: generateInfrastructureResilience(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
           demographicTrends: generateDemographicTrends(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
-          climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, proceduralReport.projections.map(p => p.horizon)),
-          socialFabric: generateSocialFabric(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
         };
 
-        geographicContext = { neighborhood, city, region };
+        geographicContext = { city, region };
 
         // Add geographic context to all projections
         proceduralReport.projections = proceduralReport.projections.map(proj => ({
@@ -925,24 +909,12 @@ Return valid JSON only (no markdown). Include all fields below:
       const geocoded = await reverseGeocodeAddress(address);
 
       // Try to fetch real APIs; fall back to procedural if unavailable
-      const neighborhood = {
-        scale: 'neighborhood' as const,
-        location: geocoded.censusTract,
-        economicViability: generateEconomicViability(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
-        infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
-        demographicTrends: generateDemographicTrends(geocoded.censusTract, parsedReport.projections.map(p => p.horizon)),
-        climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, parsedReport.projections.map(p => p.horizon)),
-        socialFabric: generateSocialFabric(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
-      };
-
       const city = {
         scale: 'city' as const,
         location: geocoded.municipality,
         economicViability: generateEconomicViability(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
         infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
         demographicTrends: generateDemographicTrends(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
-        climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, parsedReport.projections.map(p => p.horizon)),
-        socialFabric: generateSocialFabric(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
       };
 
       const region = {
@@ -951,11 +923,9 @@ Return valid JSON only (no markdown). Include all fields below:
         economicViability: generateEconomicViability(geocoded.state, parsedReport.projections.map(p => p.horizon)),
         infrastructureResilience: generateInfrastructureResilience(geocoded.state, parsedReport.projections.map(p => p.horizon)),
         demographicTrends: generateDemographicTrends(geocoded.state, parsedReport.projections.map(p => p.horizon)),
-        climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, parsedReport.projections.map(p => p.horizon)),
-        socialFabric: generateSocialFabric(geocoded.state, parsedReport.projections.map(p => p.horizon)),
       };
 
-      geographicContext = { neighborhood, city, region };
+      geographicContext = { city, region };
 
       // Add geographic context to all projections
       parsedReport.projections = parsedReport.projections.map(proj => ({

@@ -93,52 +93,32 @@ export interface GeographicSignal {
 }
 
 export interface GeographicScaleContext {
-  scale: 'neighborhood' | 'city' | 'region';
-  location: string;  // e.g. "94105", "San Francisco", "California"
+  scale: 'city' | 'region';
+  location: string;  // e.g. "San Francisco", "California"
 
-  // Economic Viability (4 signals)
+  // Economic Viability (3 signals)
   economicViability: {
-    municipalDebtRatio: GeographicSignal;
-    taxCollectionRate: GeographicSignal;
-    commercialVacancyRate: GeographicSignal;
-    businessFormationRate: GeographicSignal;
-  };
-
-  // Infrastructure Resilience (4 signals)
-  infrastructureResilience: {
-    utilitySystemAge: GeographicSignal;
-    electricalGridStress: GeographicSignal;
-    broadbandAvailability: GeographicSignal;
-    roadMaintenanceBacklog: GeographicSignal;
+    medianHouseholdIncome: GeographicSignal;
+    povertyRate: GeographicSignal;
+    unemploymentRate: GeographicSignal;
   };
 
   // Demographic Trends (4 signals)
   demographicTrends: {
+    population: GeographicSignal;
+    ageDistribution: GeographicSignal;
+    educationLevel: GeographicSignal;
     netMigrationRate: GeographicSignal;
-    populationGrowth: GeographicSignal;
-    ageDistributionShift: GeographicSignal;
-    educationLevelChange: GeographicSignal;
   };
 
-  // Climate Migration (4 signals)
-  climateMigration: {
-    climateRefugeeInflowProjection: GeographicSignal;
-    climateRefugeeOutflowProjection: GeographicSignal;
-    temperatureExposure: GeographicSignal;
-    floodExposureOfOriginRegions: GeographicSignal;
-  };
-
-  // Social Fabric (4 signals)
-  socialFabric: {
-    civicParticipationRate: GeographicSignal;
-    communityStabilityIndex: GeographicSignal;
-    politicalAlignmentWithAdaptation: GeographicSignal;
-    resilienceNewsSentiment: GeographicSignal;
+  // Infrastructure Resilience (2 signals)
+  infrastructureResilience: {
+    broadbandAvailability: GeographicSignal;
+    utilitySystemAge: GeographicSignal;
   };
 }
 
 export interface GeographicContext {
-  neighborhood: GeographicScaleContext;
   city: GeographicScaleContext;
   region: GeographicScaleContext;
 }
