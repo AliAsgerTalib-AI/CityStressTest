@@ -186,7 +186,8 @@ Return valid JSON only (no markdown). Include all fields below:
         "hardinessZone": "10b → 11a"
       },
       "specialists": {
-        "macroEconomist": { "verdict": "BULLISH|STABLE|WATCH|BEARISH|DIVEST", "confidence": "High", "riskScore": 5, "narrative": "1-sentence assessment", "criticalDate": "2050", "comparativeContext": "property value decline below national average" },
+        "macroEconomist": { "verdict": "BULLISH|STABLE|WATCH|BEARISH|DIVEST", "confidence": "HIGH", "riskScore": 5, "narrative": "1-sentence assessment", "criticalDate": "2050", "comparativeContext": "property value decline below national average" },
+        "insuranceActuary": { "verdict": "BEARISH", "confidence": "HIGH", "riskScore": 8.2, "narrative": "Insurance availability will be severely constrained. Premiums will rise 15-25% annually as climate risk concentrates. By 2040, standard homeowners insurance becomes unavailable; only specialty insurers remain at 2-3x costs.", "comparativeContext": "Similar coastal properties 20 miles south already see 40% of the market uninsurable." },
         "zoningAttorney": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "municipalPolicy": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "structuralEngineer": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
