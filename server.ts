@@ -110,8 +110,8 @@ Use Google Search to find: current property prices, climate data, flood history,
 ADDITIONAL REQUIREMENTS:
 
 1. CONFIDENCE LEVELS
-Add to each specialist verdict: confidence level (Low, Medium, High)
-Example: verdict "WATCH", confidence "High"
+Add to each specialist verdict: confidence level (LOW, MEDIUM, HIGH)
+Example: verdict "WATCH", confidence "HIGH"
 
 2. RISK SCORING
 - Per specialist: 1-10 risk score (1=low, 10=critical)
