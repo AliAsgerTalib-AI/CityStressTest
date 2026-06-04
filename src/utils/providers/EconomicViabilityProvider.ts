@@ -135,7 +135,7 @@ export class EconomicViabilityProvider {
       LA: '22', KY: '21', OR: '41', OK: '40', CT: '09', UT: '49', NV: '32', AR: '05',
       MS: '28', KS: '20', NM: '35', NE: '31', ID: '16', HI: '15', NH: '33', ME: '23',
       MT: '30', RI: '44', DE: '10', SD: '46', ND: '38', AK: '02', VT: '50', WY: '56',
-      DC: '11',
+      IA: '19', WV: '54', DC: '11',
     };
     return stateMap[state.toUpperCase()] || '06';
   }
