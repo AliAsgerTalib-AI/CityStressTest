@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import NodeGeocoder from "node-geocoder";
 import { StressTestReport } from "./src/types.js";
 import { generateProceduralReport } from "./src/utils/stressTestUtils.js";
 
@@ -59,6 +60,42 @@ function getGeminiClient(): GoogleGenAI {
     }
   }
   return aiClient;
+}
+
+const geocoder = NodeGeocoder({ provider: "openstreetmap" });
+
+interface GeocodeResult {
+  lat: number;
+  lng: number;
+  censusTract: string;  // 11-digit FIPS code (mock for now, real data from Census API)
+  municipality: string;
+  state: string;
+}
+
+async function reverseGeocodeAddress(address: string): Promise<GeocodeResult> {
+  try {
+    const results = await geocoder.geocode(address);
+    if (results.length === 0) {
+      throw new Error(`Could not geocode address: ${address}`);
+    }
+
+    const first = results[0];
+
+    // For production: fetch actual census tract from Census Bureau API
+    // For now: mock census tract based on zipcode
+    const censusTract = `${(Math.random() * 1e11).toFixed(0)}`.padStart(11, '0');
+
+    return {
+      lat: first.latitude || 0,
+      lng: first.longitude || 0,
+      censusTract,
+      municipality: first.city || first.county || 'Unknown',
+      state: first.stateCode || 'Unknown',
+    };
+  } catch (error: any) {
+    console.error(`Geocoding failed for ${address}:`, error.message);
+    throw new Error(`Failed to geocode address: ${error.message}`);
+  }
 }
 
 // API endpoint for climate stress-testing
