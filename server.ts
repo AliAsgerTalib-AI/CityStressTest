@@ -10,8 +10,15 @@ import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import NodeGeocoder from "node-geocoder";
-import { StressTestReport } from "./src/types.js";
-import { generateProceduralReport } from "./src/utils/stressTestUtils.js";
+import { StressTestReport, GeographicContext } from "./src/types.js";
+import {
+  generateProceduralReport,
+  generateEconomicViability,
+  generateInfrastructureResilience,
+  generateDemographicTrends,
+  generateClimateMigration,
+  generateSocialFabric,
+} from "./src/utils/stressTestUtils.js";
 
 dotenv.config();
 
@@ -573,10 +580,60 @@ app.post("/api/stress-test", async (req, res) => {
     // If no API is available, use procedural fallback
     if (useProceduralFallback || !ai) {
       console.log(`Generating procedural report for [${address}] (Gemini API not available)...`);
-      const proceduralReport = generateProceduralReport(address);
+      let proceduralReport = generateProceduralReport(address);
       proceduralReport.dataQuality = "ESTIMATED";
       proceduralReport.baselinePriceNote =
         "Property price estimated via procedural simulation. Real-time data not available.";
+
+      // Fetch geographic context (new Phase 2 feature)
+      let geographicContext: GeographicContext | null = null;
+      try {
+        const geocoded = await reverseGeocodeAddress(address);
+
+        // Try to fetch real APIs; fall back to procedural if unavailable
+        const neighborhood = {
+          scale: 'neighborhood' as const,
+          location: geocoded.censusTract,
+          economicViability: generateEconomicViability(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
+          infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
+          demographicTrends: generateDemographicTrends(geocoded.censusTract, proceduralReport.projections.map(p => p.horizon)),
+          climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, proceduralReport.projections.map(p => p.horizon)),
+          socialFabric: generateSocialFabric(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
+        };
+
+        const city = {
+          scale: 'city' as const,
+          location: geocoded.municipality,
+          economicViability: generateEconomicViability(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
+          infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
+          demographicTrends: generateDemographicTrends(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
+          climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, proceduralReport.projections.map(p => p.horizon)),
+          socialFabric: generateSocialFabric(geocoded.municipality, proceduralReport.projections.map(p => p.horizon)),
+        };
+
+        const region = {
+          scale: 'region' as const,
+          location: geocoded.state,
+          economicViability: generateEconomicViability(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
+          infrastructureResilience: generateInfrastructureResilience(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
+          demographicTrends: generateDemographicTrends(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
+          climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, proceduralReport.projections.map(p => p.horizon)),
+          socialFabric: generateSocialFabric(geocoded.state, proceduralReport.projections.map(p => p.horizon)),
+        };
+
+        geographicContext = { neighborhood, city, region };
+
+        // Add geographic context to all projections
+        proceduralReport.projections = proceduralReport.projections.map(proj => ({
+          ...proj,
+          geographicContext,
+        }));
+
+        console.log(`Successfully generated geographic context for [${address}].`);
+      } catch (error: any) {
+        console.warn(`Could not generate geographic context: ${error.message}. Continuing without it.`);
+        // Continue without geographic context; it's optional
+      }
 
       console.log(
         `Successfully generated procedural stress test report for [${address}].`,
@@ -855,12 +912,62 @@ Return valid JSON only (no markdown). Include all fields below:
       .replace(/^```json/, "")
       .replace(/```$/, "")
       .trim();
-    const parsedReport = JSON.parse(cleanText) as StressTestReport;
+    let parsedReport = JSON.parse(cleanText) as StressTestReport;
 
     // Mark data as verified since it's grounded in Google Search
     parsedReport.dataQuality = "VERIFIED_WITH_GROUNDING";
     parsedReport.baselinePriceNote =
       "Property price verified with live Google Search grounding and local market data.";
+
+    // Fetch geographic context (new Phase 2 feature)
+    let geographicContext: GeographicContext | null = null;
+    try {
+      const geocoded = await reverseGeocodeAddress(address);
+
+      // Try to fetch real APIs; fall back to procedural if unavailable
+      const neighborhood = {
+        scale: 'neighborhood' as const,
+        location: geocoded.censusTract,
+        economicViability: generateEconomicViability(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
+        infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
+        demographicTrends: generateDemographicTrends(geocoded.censusTract, parsedReport.projections.map(p => p.horizon)),
+        climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, parsedReport.projections.map(p => p.horizon)),
+        socialFabric: generateSocialFabric(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
+      };
+
+      const city = {
+        scale: 'city' as const,
+        location: geocoded.municipality,
+        economicViability: generateEconomicViability(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
+        infrastructureResilience: generateInfrastructureResilience(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
+        demographicTrends: generateDemographicTrends(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
+        climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, parsedReport.projections.map(p => p.horizon)),
+        socialFabric: generateSocialFabric(geocoded.municipality, parsedReport.projections.map(p => p.horizon)),
+      };
+
+      const region = {
+        scale: 'region' as const,
+        location: geocoded.state,
+        economicViability: generateEconomicViability(geocoded.state, parsedReport.projections.map(p => p.horizon)),
+        infrastructureResilience: generateInfrastructureResilience(geocoded.state, parsedReport.projections.map(p => p.horizon)),
+        demographicTrends: generateDemographicTrends(geocoded.state, parsedReport.projections.map(p => p.horizon)),
+        climateMigration: generateClimateMigration(geocoded.lat, geocoded.lng, parsedReport.projections.map(p => p.horizon)),
+        socialFabric: generateSocialFabric(geocoded.state, parsedReport.projections.map(p => p.horizon)),
+      };
+
+      geographicContext = { neighborhood, city, region };
+
+      // Add geographic context to all projections
+      parsedReport.projections = parsedReport.projections.map(proj => ({
+        ...proj,
+        geographicContext,
+      }));
+
+      console.log(`Successfully generated geographic context for [${address}].`);
+    } catch (error: any) {
+      console.warn(`Could not generate geographic context: ${error.message}. Continuing without it.`);
+      // Continue without geographic context; it's optional
+    }
 
     console.log(
       `Successfully generated dynamic climate reports for [${address}] via Gemini with live Google Search Grounding.`,
