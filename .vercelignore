@@ -1,0 +1,9 @@
+.git
+.gitignore
+node_modules
+.env.local
+.env.*.local
+src/**/*.test.ts
+src/**/*.test.tsx
+*.md
+.DS_Store
