@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import { MetricRow } from './MetricRow';
-import { HorizonMetrics } from '../types';
+import { HorizonMetrics, MetricUncertainty } from '../types';
 
 interface Metric {
   name: string;
@@ -16,6 +16,23 @@ interface MetricGroupProps {
   groupName: string;
   metrics: Metric[];
   horizonMetrics: HorizonMetrics;
+}
+
+/**
+ * Type guard to validate MetricUncertainty objects
+ * Ensures the object has all required properties before use
+ */
+function isMetricUncertainty(value: unknown): value is MetricUncertainty {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'confidenceLevel' in value &&
+    'lowScenario' in value &&
+    'baselineScenario' in value &&
+    'highScenario' in value &&
+    'failureChainNarrative' in value &&
+    'provenance' in value
+  );
 }
 
 export const MetricGroup: React.FC<MetricGroupProps> = ({
@@ -44,8 +61,15 @@ export const MetricGroup: React.FC<MetricGroupProps> = ({
             const value = horizonMetrics[metric.key];
             const uncertainty = horizonMetrics[metric.uncertaintyKey];
 
-            // Skip if uncertainty data is missing (shouldn't happen, but defensive)
-            if (!uncertainty || typeof uncertainty !== 'object') {
+            // Validate metric value exists
+            if (value === undefined || value === null) {
+              console.warn(`Missing metric value for key: ${metric.key}`);
+              return null;
+            }
+
+            // Validate uncertainty data with type guard
+            if (!isMetricUncertainty(uncertainty)) {
+              console.warn(`Invalid uncertainty data for key: ${metric.uncertaintyKey}`);
               return null;
             }
 
@@ -54,7 +78,7 @@ export const MetricGroup: React.FC<MetricGroupProps> = ({
                 key={metric.key}
                 metricName={metric.name}
                 metricValue={String(value)}
-                uncertainty={uncertainty as any}
+                uncertainty={uncertainty}
               />
             );
           })}
