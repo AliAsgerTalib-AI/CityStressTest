@@ -42,7 +42,7 @@ npm run clean
 1. User enters an address in the React UI
 2. Frontend makes POST request to `/api/stress-test` with the address
 3. Backend either:
-   - Calls Google Gemini API with a detailed prompt asking for structured JSON analysis (if `GEMINI_API_KEY` is set)
+   - Calls Google Gemini API with a detailed prompt asking for structured JSON analysis (if `VITE_GEMINI_API_KEY` is set)
    - Falls back to `generateProceduralReport()` for deterministic offline simulation
 4. Backend returns `StressTestReport` (TypeScript `StressTestReport` interface in `src/types.ts`)
 5. Frontend renders interactive visualizations with time-series charts, specialist verdicts, and regional metrics
@@ -74,7 +74,7 @@ npm run clean
 
 ## Configuration & Environment
 
-- **GEMINI_API_KEY** — Required for AI-powered report generation. If not set or placeholder, the app falls back to deterministic procedural simulation.
+- **VITE_GEMINI_API_KEY** — Required for AI-powered report generation. If not set or placeholder, the app falls back to deterministic procedural simulation.
 - **APP_URL** — Optional; used for self-referential links and OAuth callbacks in AI Studio deployments.
 - **DISABLE_HMR** — Environment variable (used in AI Studio). When set to `"true"`, disables Vite HMR and file watching to reduce CPU during agent edits.
 
@@ -108,7 +108,7 @@ Expected output is a `StressTestReport` JSON object. If Gemini parsing fails or 
   - Proper API calls to `/api/stress-test`
   - Correct rendering of charts (Recharts for timeline, D3 for geographic overlay)
   - PDF export functionality (using html2canvas + jsPDF)
-  - Fallback behavior when `GEMINI_API_KEY` is missing
+  - Fallback behavior when `VITE_GEMINI_API_KEY` is missing
   - Specialist verdict display and social sentiment analysis
 
 ## Common Development Tasks
@@ -131,7 +131,7 @@ Expected output is a `StressTestReport` JSON object. If Gemini parsing fails or 
 4. Update any display logic in `src/App.tsx` and components to render the new fields.
 
 ### Running Locally Without Gemini
-Set `GEMINI_API_KEY` to an empty string or placeholder, and the app will use deterministic procedural simulation. This is useful for offline development and testing the UI without API costs.
+Set `VITE_GEMINI_API_KEY` to an empty string or placeholder, and the app will use deterministic procedural simulation. This is useful for offline development and testing the UI without API costs.
 
 ## Build & Deployment Notes
 

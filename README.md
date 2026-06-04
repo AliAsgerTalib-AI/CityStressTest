@@ -72,8 +72,8 @@ npm run dev
 1. **Get API Key** - https://aistudio.google.com/app/apikey
 2. **Import to Vercel** - https://vercel.com/new
 3. **Add Environment Variables:**
-   - `GEMINI_API_KEY` = your api key
-   - `GEMINI_MODEL` = gemini-2.0-flash (optional)
+   - `VITE_GEMINI_API_KEY` = your api key
+   - `VITE_GEMINI_MODEL` = gemini-2.0-flash (optional)
 4. **Deploy** - Click "Deploy"
 
 **See [VERCEL_SETUP_CHECKLIST.md](VERCEL_SETUP_CHECKLIST.md) for step-by-step guide**
@@ -131,10 +131,10 @@ npm run clean
 ### Environment Variables
 
 **Required for Gemini AI:**
-- `GEMINI_API_KEY` - Your Google Gemini API key (https://aistudio.google.com/app/apikey)
+- `VITE_GEMINI_API_KEY` - Your Google Gemini API key (https://aistudio.google.com/app/apikey)
 
 **Optional:**
-- `GEMINI_MODEL` - Model to use (default: `gemini-2.0-flash`)
+- `VITE_GEMINI_MODEL` - Model to use (default: `gemini-2.0-flash`)
   - Options: `gemini-2.0-flash`, `gemini-2.0-flash-exp`, `gemini-1.5-pro`, `gemini-1.5-flash`
 - `APP_URL` - Your application URL (for self-referential links)
 - `DISABLE_HMR` - Set to `true` to disable hot module reload in production

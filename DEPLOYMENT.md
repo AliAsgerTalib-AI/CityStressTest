@@ -46,8 +46,8 @@ Add these variables:
 
 | Variable | Value | Required | Notes |
 |----------|-------|----------|-------|
-| `GEMINI_API_KEY` | Your actual API key | ✅ Yes | Get from https://aistudio.google.com/app/apikey |
-| `GEMINI_MODEL` | `gemini-2.0-flash` | ❌ No | Default: gemini-2.0-flash. See model options below |
+| `VITE_GEMINI_API_KEY` | Your actual API key | ✅ Yes | Get from https://aistudio.google.com/app/apikey |
+| `VITE_GEMINI_MODEL` | `gemini-2.0-flash` | ❌ No | Default: gemini-2.0-flash. See model options below |
 | `APP_URL` | Your Vercel domain | ❌ No | Auto-configured, or set manually |
 
 ### Gemini Model Options
@@ -64,8 +64,8 @@ Choose one based on your needs:
 ### Example Configuration:
 
 ```
-GEMINI_API_KEY = sk-...your-key-here...
-GEMINI_MODEL = gemini-2.0-flash
+VITE_GEMINI_API_KEY = sk-...your-key-here...
+VITE_GEMINI_MODEL = gemini-2.0-flash
 ```
 
 ## Step 5: Deploy
@@ -123,17 +123,17 @@ View deployment logs:
 
 ## Troubleshooting
 
-### "GEMINI_API_KEY is not defined"
+### "VITE_GEMINI_API_KEY is not defined"
 
-**Solution:** Make sure you added `GEMINI_API_KEY` to Vercel Environment Variables:
+**Solution:** Make sure you added `VITE_GEMINI_API_KEY` to Vercel Environment Variables:
 1. Go to Vercel Project Settings
 2. Go to Environment Variables
-3. Add `GEMINI_API_KEY` with your actual key
+3. Add `VITE_GEMINI_API_KEY` with your actual key
 4. Redeploy
 
 ### "Model not found"
 
-**Solution:** Ensure `GEMINI_MODEL` is set to a valid model name:
+**Solution:** Ensure `VITE_GEMINI_MODEL` is set to a valid model name:
 - Valid: `gemini-2.0-flash`, `gemini-1.5-pro`, `gemini-1.5-flash`
 - Invalid: `gemini-3.5-flash` (doesn't exist yet)
 
@@ -157,7 +157,7 @@ Monitor in Vercel logs under "Duration"
 
 ## Advanced: Updating Environment Variables
 
-If you need to change `GEMINI_API_KEY` or `GEMINI_MODEL`:
+If you need to change `VITE_GEMINI_API_KEY` or `VITE_GEMINI_MODEL`:
 
 1. Go to Vercel Project Settings → Environment Variables
 2. Click the variable to edit
