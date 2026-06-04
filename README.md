@@ -37,10 +37,12 @@ CityStressTest evaluates the long-term viability of residential properties acros
 ✅ **13 Specialist Verdicts** - Multi-disciplinary analysis  
 ✅ **Interactive Charts** - Recharts for timeline visualization  
 ✅ **Geographic Overlays** - D3-based climate hazard mapping  
+✅ **Real Geographic Data** - Census, infrastructure, and economic metrics from live sources  
+✅ **Smart Caching** - 48-hour localStorage cache reduces API calls  
 ✅ **PDF Export** - Generate comprehensive reports  
 ✅ **Data Quality Indicators** - Know when data is verified vs. procedural  
 ✅ **Google Search Grounding** - Live property prices and climate research  
-✅ **Graceful Fallback** - Works offline without API key  
+✅ **Graceful Fallback** - Works offline without API keys  
 
 ---
 
@@ -126,6 +128,59 @@ npm run clean
 
 ---
 
+## Geographic Data Integration
+
+### Real Data Providers
+
+CityStressTest now integrates with real geographic data sources for enhanced analysis:
+
+#### 1. **DemographicTrendsProvider**
+- **Data Source**: US Census Bureau (ACS)
+- **Metrics**: Population, median age, education levels, net migration rates
+- **Coverage**: All US cities and municipalities
+- **Requires**: `CENSUS_API_KEY` environment variable
+
+#### 2. **InfrastructureResilienceProvider**  
+- **Data Sources**: FCC Broadband Maps, USGS Infrastructure databases, OpenStreetMap
+- **Metrics**: Broadband availability, utility system age, grid resilience
+- **Coverage**: Global
+
+#### 3. **EconomicViabilityProvider**
+- **Data Sources**: Census ACS, BLS (Bureau of Labor Statistics)
+- **Metrics**: Median household income, poverty rates, unemployment rates
+- **Coverage**: All US locations
+- **Requires**: `CENSUS_API_KEY` environment variable
+
+### Frontend Caching with `useGeographicCache`
+
+A React hook (`useGeographicCache`) automatically manages geographic data caching:
+
+```typescript
+import { useGeographicCache } from '@/hooks/useGeographicCache';
+
+function MyComponent() {
+  const { data, loading, error } = useGeographicCache('Miami', 'Florida');
+  
+  if (loading) return <div>Loading geographic data...</div>;
+  if (error) return <div>Error: {error}</div>;
+  
+  return (
+    <div>
+      <h2>Economic Data:</h2>
+      <p>Median Income: {data?.city.economicViability.medianHouseholdIncome.value}</p>
+    </div>
+  );
+}
+```
+
+**Features:**
+- ✅ Automatic localStorage caching (48-hour TTL)
+- ✅ Graceful fallback when API unavailable
+- ✅ Prevents redundant API calls
+- ✅ Automatic cache expiration and refresh
+
+---
+
 ## Configuration
 
 ### Environment Variables
@@ -133,11 +188,18 @@ npm run clean
 **Required for Gemini AI:**
 - `VITE_GEMINI_API_KEY` - Your Google Gemini API key (https://aistudio.google.com/app/apikey)
 
-**Optional:**
+**Optional - Geographic Data:**
+- `CENSUS_API_KEY` - US Census Bureau API key for demographic and economic data
+  - Get your key from: https://api.census.gov/data/key_signup.html
+  - Enables real demographic and economic metrics for US locations
+  - Without this key, the app falls back to procedural simulation
+
+**Optional - Other:**
 - `VITE_GEMINI_MODEL` - Model to use (default: `gemini-2.0-flash`)
   - Options: `gemini-2.0-flash`, `gemini-2.0-flash-exp`, `gemini-1.5-pro`, `gemini-1.5-flash`
 - `APP_URL` - Your application URL (for self-referential links)
 - `DISABLE_HMR` - Set to `true` to disable hot module reload in production
+- `OPENWEATHERMAP_API_KEY` - Optional for enhanced geocoding
 
 See [.env.example](.env.example) for details.
 
@@ -155,6 +217,48 @@ Analyze climate risk for a property location.
   "address": "Miami, Florida"
 }
 ```
+
+### GET /api/geographic-context/:city/:state
+
+Fetch real geographic data for a location (demographic, economic, and infrastructure metrics).
+
+**Request:**
+```
+GET /api/geographic-context/Miami/Florida
+```
+
+**Response:**
+```json
+{
+  "city": {
+    "scale": "city",
+    "location": "Miami",
+    "economicViability": {
+      "medianHouseholdIncome": { "value": 54000, "uncertainty": "HIGH", "source": "Census API" },
+      "povertyRate": { "value": 18.5, "uncertainty": "HIGH", "source": "Census API" },
+      "unemploymentRate": { ... }
+    },
+    "demographicTrends": {
+      "population": { ... },
+      "ageDistribution": { ... },
+      "educationLevel": { ... },
+      "netMigrationRate": { ... }
+    },
+    "infrastructureResilience": {
+      "broadbandAvailability": { ... },
+      "utilitySystemAge": { ... }
+    }
+  },
+  "region": { ... }  // State/region level aggregates
+}
+```
+
+**Data Sources:**
+- **Economic Viability**: US Census Bureau ACS (American Community Survey)
+- **Demographic Trends**: Census Bureau population and migration data
+- **Infrastructure Resilience**: Broadband availability (FCC), utility system assessments
+
+**Caching:** Results are cached in-memory on the backend and in localStorage on the frontend (48-hour TTL) to reduce API calls.
 
 **Response:**
 ```json
