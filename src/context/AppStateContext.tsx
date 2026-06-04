@@ -34,7 +34,7 @@ export interface AppState {
   // UI State
   selectedHorizonIndex: number;
   selectedSpecialist: keyof Specialists;
-  activeTab: 'readouts' | 'forecaster';
+  activeTab: 'readouts' | 'forecaster' | 'analysis';
   policySensitivity: number;
 
   // Loading & Errors

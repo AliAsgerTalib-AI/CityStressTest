@@ -17,6 +17,7 @@ import { PolicySensitivityPanel } from './components/PolicySensitivityPanel';
 import { SpecialistBoard } from './components/SpecialistBoard';
 import { HorizonChart } from './components/HorizonChart';
 import { ForecastingTab } from './components/ForecastingTab';
+import { AnalysisTab } from './components/AnalysisTab';
 import { GeographicThreatOverlay } from './components/GeographicThreatOverlay';
 
 function AppContent() {
@@ -114,6 +115,16 @@ function AppContent() {
               >
                 🔮 Climate Models
               </button>
+              <button
+                onClick={() => ui.setActiveTab('analysis')}
+                className={`flex-1 py-3 px-4 font-mono text-[11px] uppercase tracking-wider font-extrabold transition-all border cursor-pointer select-none flex items-center justify-center gap-2 ${
+                  ui.activeTab === 'analysis'
+                    ? 'bg-accent-gold text-bg-dark border-accent-gold font-bold'
+                    : 'bg-bg-dark border-border-dark text-[#888888] hover:text-[#e5e5e5] hover:border-[#888888]'
+                }`}
+              >
+                📈 Analysis
+              </button>
             </div>
 
             {/* Tab Content: Risk Assessment */}
@@ -150,6 +161,20 @@ function AppContent() {
                 historicalWeatherData={weather.historicalWeatherData}
                 useRealHistory={weather.useRealHistory}
                 setUseRealHistory={weather.setUseRealHistory}
+              />
+            )}
+
+            {/* Tab Content: Analysis */}
+            {ui.activeTab === 'analysis' && policy.activeReport && ui.currentProjection && (
+              <AnalysisTab
+                activeReport={policy.activeReport}
+                currentProjection={ui.currentProjection}
+                onSelectHorizon={(horizon) => {
+                  const proj = policy.activeReport?.projections.find((p) => p.horizon === horizon);
+                  if (proj) {
+                    ui.setCurrentProjection(proj);
+                  }
+                }}
               />
             )}
           </div>
