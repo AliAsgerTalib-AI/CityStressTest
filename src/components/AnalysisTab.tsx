@@ -265,6 +265,65 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                 />
               </div>
             )}
+
+            {viewMode === 'confidence' && (
+              <div>
+                <MetricGroup
+                  groupName="ECONOMIC VIABILITY"
+                  metrics={[
+                    { name: 'Municipal Debt Ratio', key: 'municipalDebtRatio' as const, uncertaintyKey: 'municipalDebtRatio' as const },
+                    { name: 'Tax Collection Rate', key: 'taxCollectionRate' as const, uncertaintyKey: 'taxCollectionRate' as const },
+                    { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
+                    { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
+                  ]}
+                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                />
+
+                <MetricGroup
+                  groupName="INFRASTRUCTURE RESILIENCE"
+                  metrics={[
+                    { name: 'Utility System Age', key: 'utilitySystemAge' as const, uncertaintyKey: 'utilitySystemAge' as const },
+                    { name: 'Electrical Grid Stress', key: 'electricalGridStress' as const, uncertaintyKey: 'electricalGridStress' as const },
+                    { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
+                    { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
+                  ]}
+                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                />
+
+                <MetricGroup
+                  groupName="DEMOGRAPHIC TRENDS"
+                  metrics={[
+                    { name: 'Net Migration Rate', key: 'netMigrationRate' as const, uncertaintyKey: 'netMigrationRate' as const },
+                    { name: 'Population Growth', key: 'populationGrowth' as const, uncertaintyKey: 'populationGrowth' as const },
+                    { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
+                    { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
+                  ]}
+                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                />
+
+                <MetricGroup
+                  groupName="CLIMATE MIGRATION"
+                  metrics={[
+                    { name: 'Climate Refugee Inflow', key: 'climateRefugeeInflowProjection' as const, uncertaintyKey: 'climateRefugeeInflowProjection' as const },
+                    { name: 'Climate Refugee Outflow', key: 'climateRefugeeOutflowProjection' as const, uncertaintyKey: 'climateRefugeeOutflowProjection' as const },
+                    { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
+                    { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
+                  ]}
+                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                />
+
+                <MetricGroup
+                  groupName="SOCIAL FABRIC"
+                  metrics={[
+                    { name: 'Civic Participation', key: 'civicParticipationRate' as const, uncertaintyKey: 'civicParticipationRate' as const },
+                    { name: 'Community Stability', key: 'communityStabilityIndex' as const, uncertaintyKey: 'communityStabilityIndex' as const },
+                    { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
+                    { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
+                  ]}
+                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -335,6 +394,65 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                 />
               </div>
             )}
+
+            {viewMode === 'confidence' && (
+              <div>
+                <MetricGroup
+                  groupName="ECONOMIC VIABILITY"
+                  metrics={[
+                    { name: 'Municipal Debt Ratio', key: 'municipalDebtRatio' as const, uncertaintyKey: 'municipalDebtRatio' as const },
+                    { name: 'Tax Collection Rate', key: 'taxCollectionRate' as const, uncertaintyKey: 'taxCollectionRate' as const },
+                    { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
+                    { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
+                  ]}
+                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                />
+
+                <MetricGroup
+                  groupName="INFRASTRUCTURE RESILIENCE"
+                  metrics={[
+                    { name: 'Utility System Age', key: 'utilitySystemAge' as const, uncertaintyKey: 'utilitySystemAge' as const },
+                    { name: 'Electrical Grid Stress', key: 'electricalGridStress' as const, uncertaintyKey: 'electricalGridStress' as const },
+                    { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
+                    { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
+                  ]}
+                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                />
+
+                <MetricGroup
+                  groupName="DEMOGRAPHIC TRENDS"
+                  metrics={[
+                    { name: 'Net Migration Rate', key: 'netMigrationRate' as const, uncertaintyKey: 'netMigrationRate' as const },
+                    { name: 'Population Growth', key: 'populationGrowth' as const, uncertaintyKey: 'populationGrowth' as const },
+                    { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
+                    { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
+                  ]}
+                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                />
+
+                <MetricGroup
+                  groupName="CLIMATE MIGRATION"
+                  metrics={[
+                    { name: 'Climate Refugee Inflow', key: 'climateRefugeeInflowProjection' as const, uncertaintyKey: 'climateRefugeeInflowProjection' as const },
+                    { name: 'Climate Refugee Outflow', key: 'climateRefugeeOutflowProjection' as const, uncertaintyKey: 'climateRefugeeOutflowProjection' as const },
+                    { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
+                    { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
+                  ]}
+                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                />
+
+                <MetricGroup
+                  groupName="SOCIAL FABRIC"
+                  metrics={[
+                    { name: 'Civic Participation', key: 'civicParticipationRate' as const, uncertaintyKey: 'civicParticipationRate' as const },
+                    { name: 'Community Stability', key: 'communityStabilityIndex' as const, uncertaintyKey: 'communityStabilityIndex' as const },
+                    { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
+                    { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
+                  ]}
+                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -348,6 +466,65 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
           <div>
             {viewMode === 'domain' && (
+              <div>
+                <MetricGroup
+                  groupName="ECONOMIC VIABILITY"
+                  metrics={[
+                    { name: 'Municipal Debt Ratio', key: 'municipalDebtRatio' as const, uncertaintyKey: 'municipalDebtRatio' as const },
+                    { name: 'Tax Collection Rate', key: 'taxCollectionRate' as const, uncertaintyKey: 'taxCollectionRate' as const },
+                    { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
+                    { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
+                  ]}
+                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                />
+
+                <MetricGroup
+                  groupName="INFRASTRUCTURE RESILIENCE"
+                  metrics={[
+                    { name: 'Utility System Age', key: 'utilitySystemAge' as const, uncertaintyKey: 'utilitySystemAge' as const },
+                    { name: 'Electrical Grid Stress', key: 'electricalGridStress' as const, uncertaintyKey: 'electricalGridStress' as const },
+                    { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
+                    { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
+                  ]}
+                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                />
+
+                <MetricGroup
+                  groupName="DEMOGRAPHIC TRENDS"
+                  metrics={[
+                    { name: 'Net Migration Rate', key: 'netMigrationRate' as const, uncertaintyKey: 'netMigrationRate' as const },
+                    { name: 'Population Growth', key: 'populationGrowth' as const, uncertaintyKey: 'populationGrowth' as const },
+                    { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
+                    { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
+                  ]}
+                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                />
+
+                <MetricGroup
+                  groupName="CLIMATE MIGRATION"
+                  metrics={[
+                    { name: 'Climate Refugee Inflow', key: 'climateRefugeeInflowProjection' as const, uncertaintyKey: 'climateRefugeeInflowProjection' as const },
+                    { name: 'Climate Refugee Outflow', key: 'climateRefugeeOutflowProjection' as const, uncertaintyKey: 'climateRefugeeOutflowProjection' as const },
+                    { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
+                    { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
+                  ]}
+                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                />
+
+                <MetricGroup
+                  groupName="SOCIAL FABRIC"
+                  metrics={[
+                    { name: 'Civic Participation', key: 'civicParticipationRate' as const, uncertaintyKey: 'civicParticipationRate' as const },
+                    { name: 'Community Stability', key: 'communityStabilityIndex' as const, uncertaintyKey: 'communityStabilityIndex' as const },
+                    { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
+                    { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
+                  ]}
+                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                />
+              </div>
+            )}
+
+            {viewMode === 'confidence' && (
               <div>
                 <MetricGroup
                   groupName="ECONOMIC VIABILITY"
