@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import crypto from "crypto";
 import NodeGeocoder from "node-geocoder";
 import { StressTestReport } from "./src/types.js";
 import { generateProceduralReport } from "./src/utils/stressTestUtils.js";
@@ -81,20 +82,26 @@ async function reverseGeocodeAddress(address: string): Promise<GeocodeResult> {
 
     const first = results[0];
 
+    // Validate that coordinates are present
+    if (!first.latitude || !first.longitude) {
+      throw new Error(`Geocoding for "${address}" did not return valid coordinates`);
+    }
+
     // For production: fetch actual census tract from Census Bureau API
-    // For now: mock census tract based on zipcode
-    const censusTract = `${(Math.random() * 1e11).toFixed(0)}`.padStart(11, '0');
+    // For now: mock census tract deterministically based on address hash
+    const hash = crypto.createHash('md5').update(address).digest('hex');
+    const censusTract = hash.substring(0, 11).padStart(11, '0');
 
     return {
-      lat: first.latitude || 0,
-      lng: first.longitude || 0,
+      lat: first.latitude,
+      lng: first.longitude,
       censusTract,
       municipality: first.city || first.county || 'Unknown',
       state: first.stateCode || 'Unknown',
     };
   } catch (error: any) {
     console.error(`Geocoding failed for ${address}:`, error.message);
-    throw new Error(`Failed to geocode address: ${error.message}`);
+    throw error;  // Re-throw original error to preserve stack trace
   }
 }
 
