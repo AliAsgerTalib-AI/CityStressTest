@@ -62,37 +62,37 @@ const METRIC_GROUPS = [
 ];
 
 // Convert GeographicScaleContext into HorizonMetrics-like structure for MetricGroup
-function buildNeighborhoodMetrics(context: GeographicScaleContext): any {
-  return {
-    municipalDebtRatio: context.economicViability.municipalDebtRatio,
-    taxCollectionRate: context.economicViability.taxCollectionRate,
-    commercialVacancyRate: context.economicViability.commercialVacancyRate,
-    businessFormationRate: context.economicViability.businessFormationRate,
-    utilitySystemAge: context.infrastructureResilience.utilitySystemAge,
-    electricalGridStress: context.infrastructureResilience.electricalGridStress,
-    broadbandAvailability: context.infrastructureResilience.broadbandAvailability,
-    roadMaintenanceBacklog: context.infrastructureResilience.roadMaintenanceBacklog,
-    netMigrationRate: context.demographicTrends.netMigrationRate,
-    populationGrowth: context.demographicTrends.populationGrowth,
-    ageDistributionShift: context.demographicTrends.ageDistributionShift,
-    educationLevelChange: context.demographicTrends.educationLevelChange,
-    climateRefugeeInflowProjection: context.climateMigration.climateRefugeeInflowProjection,
-    climateRefugeeOutflowProjection: context.climateMigration.climateRefugeeOutflowProjection,
-    temperatureExposure: context.climateMigration.temperatureExposure,
-    floodExposureOfOriginRegions: context.climateMigration.floodExposureOfOriginRegions,
-    civicParticipationRate: context.socialFabric.civicParticipationRate,
-    communityStabilityIndex: context.socialFabric.communityStabilityIndex,
-    politicalAlignmentWithAdaptation: context.socialFabric.politicalAlignmentWithAdaptation,
-    resilienceNewsSentiment: context.socialFabric.resilienceNewsSentiment,
-  };
-}
+// Flattens nested GeographicSignal objects: { name, value, uncertainty } → { key: value, keyUncertainty: uncertainty }
+function buildGeographicMetrics(context: GeographicScaleContext): any {
+  const flatMetrics: any = {};
 
-function buildCityMetrics(context: GeographicScaleContext): any {
-  return buildNeighborhoodMetrics(context);
-}
+  // Flatten each signal category: extract value and uncertainty separately
+  Object.entries(context.economicViability).forEach(([key, signal]) => {
+    flatMetrics[key] = signal.value;
+    flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
+  });
 
-function buildRegionMetrics(context: GeographicScaleContext): any {
-  return buildNeighborhoodMetrics(context);
+  Object.entries(context.infrastructureResilience).forEach(([key, signal]) => {
+    flatMetrics[key] = signal.value;
+    flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
+  });
+
+  Object.entries(context.demographicTrends).forEach(([key, signal]) => {
+    flatMetrics[key] = signal.value;
+    flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
+  });
+
+  Object.entries(context.climateMigration).forEach(([key, signal]) => {
+    flatMetrics[key] = signal.value;
+    flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
+  });
+
+  Object.entries(context.socialFabric).forEach(([key, signal]) => {
+    flatMetrics[key] = signal.value;
+    flatMetrics[key + 'Uncertainty'] = signal.uncertainty;
+  });
+
+  return flatMetrics;
 }
 
 export const AnalysisTab: React.FC<AnalysisTabProps> = ({
@@ -217,7 +217,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
                     { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -228,7 +228,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
                     { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -239,7 +239,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
                     { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -250,7 +250,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
                     { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -261,7 +261,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
                     { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
               </div>
             )}
@@ -276,7 +276,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
                     { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -287,7 +287,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
                     { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -298,7 +298,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
                     { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -309,7 +309,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
                     { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
 
                 <MetricGroup
@@ -320,7 +320,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
                     { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
                   ]}
-                  horizonMetrics={buildNeighborhoodMetrics(currentProjection.geographicContext.neighborhood)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.neighborhood)}
                 />
               </div>
             )}
@@ -346,7 +346,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
                     { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -357,7 +357,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
                     { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -368,7 +368,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
                     { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -379,7 +379,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
                     { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -390,7 +390,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
                     { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
               </div>
             )}
@@ -405,7 +405,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
                     { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -416,7 +416,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
                     { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -427,7 +427,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
                     { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -438,7 +438,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
                     { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
 
                 <MetricGroup
@@ -449,7 +449,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
                     { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
                   ]}
-                  horizonMetrics={buildCityMetrics(currentProjection.geographicContext.city)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.city)}
                 />
               </div>
             )}
@@ -475,7 +475,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
                     { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -486,7 +486,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
                     { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -497,7 +497,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
                     { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -508,7 +508,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
                     { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -519,7 +519,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
                     { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
               </div>
             )}
@@ -534,7 +534,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Commercial Vacancy Rate', key: 'commercialVacancyRate' as const, uncertaintyKey: 'commercialVacancyRate' as const },
                     { name: 'Business Formation Rate', key: 'businessFormationRate' as const, uncertaintyKey: 'businessFormationRate' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -545,7 +545,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Broadband Availability', key: 'broadbandAvailability' as const, uncertaintyKey: 'broadbandAvailability' as const },
                     { name: 'Road Maintenance Backlog', key: 'roadMaintenanceBacklog' as const, uncertaintyKey: 'roadMaintenanceBacklog' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -556,7 +556,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Age Distribution Shift', key: 'ageDistributionShift' as const, uncertaintyKey: 'ageDistributionShift' as const },
                     { name: 'Education Level Change', key: 'educationLevelChange' as const, uncertaintyKey: 'educationLevelChange' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -567,7 +567,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Temperature Exposure', key: 'temperatureExposure' as const, uncertaintyKey: 'temperatureExposure' as const },
                     { name: 'Flood Exposure (Origins)', key: 'floodExposureOfOriginRegions' as const, uncertaintyKey: 'floodExposureOfOriginRegions' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
 
                 <MetricGroup
@@ -578,7 +578,7 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
                     { name: 'Political Alignment', key: 'politicalAlignmentWithAdaptation' as const, uncertaintyKey: 'politicalAlignmentWithAdaptation' as const },
                     { name: 'Resilience Sentiment', key: 'resilienceNewsSentiment' as const, uncertaintyKey: 'resilienceNewsSentiment' as const },
                   ]}
-                  horizonMetrics={buildRegionMetrics(currentProjection.geographicContext.region)}
+                  horizonMetrics={buildGeographicMetrics(currentProjection.geographicContext.region)}
                 />
               </div>
             )}
