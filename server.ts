@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import { StressTestReport } from "./src/types.js";
+import { generateProceduralReport } from "./src/utils/stressTestUtils.js";
 
 dotenv.config();
 
@@ -70,19 +71,37 @@ app.post("/api/stress-test", async (req, res) => {
     return;
   }
 
-  let ai: GoogleGenAI;
+  let ai: GoogleGenAI | null = null;
+  let useProceduralFallback = false;
+
   try {
     ai = getGeminiClient();
   } catch (error: any) {
     console.error("Gemini API not available:", error.message);
-    res.status(503).json({
-      error: error.message,
-      hint: "Gemini API key is required. Set VITE_GEMINI_API_KEY in environment variables.",
-    });
-    return;
+    console.log("Falling back to procedural report generation...");
+    useProceduralFallback = true;
   }
 
   try {
+    // If no API is available, use procedural fallback
+    if (useProceduralFallback || !ai) {
+      console.log(`Generating procedural report for [${address}] (Gemini API not available)...`);
+      const proceduralReport = generateProceduralReport(address);
+      proceduralReport.dataQuality = "ESTIMATED";
+      proceduralReport.baselinePriceNote =
+        "Property price estimated via procedural simulation. Real-time data not available.";
+
+      console.log(
+        `Successfully generated procedural stress test report for [${address}].`,
+      );
+      res.json({
+        report: proceduralReport,
+        source: "ESTIMATED",
+        dataQuality: "ESTIMATED",
+      });
+      return;
+    }
+
     console.log(
       `Fetching live climate data from Gemini API with Google Search Grounding for [${address}]...`,
     );
