@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState } from 'react';
-import { StressTestReport, HorizonProjection, HorizonMetrics } from '../types';
+import { StressTestReport, HorizonProjection, HorizonMetrics, MetricUncertainty } from '../types';
 import { MetricGroup } from './MetricGroup';
 
 interface AnalysisTabProps {
@@ -13,6 +13,25 @@ interface AnalysisTabProps {
 }
 
 type ViewMode = 'domain' | 'confidence';
+
+const CONFIDENCE_LEVELS = ['HIGH', 'MEDIUM', 'LOW'] as const;
+
+/**
+ * Type guard to validate MetricUncertainty objects
+ * Ensures the object has all required properties before use
+ */
+function isMetricUncertainty(value: unknown): value is MetricUncertainty {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'confidenceLevel' in value &&
+    'lowScenario' in value &&
+    'baselineScenario' in value &&
+    'highScenario' in value &&
+    'failureChainNarrative' in value &&
+    'provenance' in value
+  );
+}
 
 const METRIC_GROUPS = [
   {
@@ -123,11 +142,11 @@ export const AnalysisTab: React.FC<AnalysisTabProps> = ({
 
         {viewMode === 'confidence' && (
           <div>
-            {['HIGH', 'MEDIUM', 'LOW'].map((confidenceLevel) => {
+            {CONFIDENCE_LEVELS.map((confidenceLevel) => {
               const metricsWithConfidence = METRIC_GROUPS.flatMap((group) =>
                 group.metrics.filter((metric) => {
                   const uncertainty = currentProjection.metrics[metric.uncertaintyKey];
-                  return uncertainty && (uncertainty as any).confidenceLevel === confidenceLevel;
+                  return uncertainty && isMetricUncertainty(uncertainty) && uncertainty.confidenceLevel === confidenceLevel;
                 })
               );
 
