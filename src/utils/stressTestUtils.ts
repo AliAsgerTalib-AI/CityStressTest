@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StressTestReport, HorizonProjection, Specialists, SpecialistVerdict, MetricUncertainty, MetricProvenance } from '../types';
+import { StressTestReport, HorizonProjection, Specialists, SpecialistVerdict, MetricUncertainty, MetricProvenance, GeographicSignal } from '../types';
 
 // Helper to create LOW-confidence procedural uncertainty
 function createProceduralUncertainty(
@@ -46,6 +46,61 @@ function createMixedUncertainty(
       source,
       verified: false,
       uncertainty,
+    },
+  };
+}
+
+// Helper to create LOW-confidence procedural geographic signal
+function createProceduregeographicSignal(
+  name: string,
+  baselineValue: string,
+  lowValue: string,
+  highValue: string,
+  narrative: string,
+  source: string = 'Procedural simulation'
+): GeographicSignal {
+  return {
+    name,
+    value: baselineValue,
+    uncertainty: {
+      confidenceLevel: 'LOW',
+      lowScenario: lowValue,
+      baselineScenario: baselineValue,
+      highScenario: highValue,
+      failureChainNarrative: narrative,
+      provenance: {
+        source,
+        verified: false,
+        uncertainty: '±20%',
+      },
+    },
+  };
+}
+
+// Helper for MEDIUM confidence geographic signal
+function createMixedGeographicSignal(
+  name: string,
+  baselineValue: string,
+  lowValue: string,
+  highValue: string,
+  narrative: string,
+  source: string,
+  uncertainty: string = '±10%'
+): GeographicSignal {
+  return {
+    name,
+    value: baselineValue,
+    uncertainty: {
+      confidenceLevel: 'MEDIUM',
+      lowScenario: lowValue,
+      baselineScenario: baselineValue,
+      highScenario: highValue,
+      failureChainNarrative: narrative,
+      provenance: {
+        source,
+        verified: false,
+        uncertainty,
+      },
     },
   };
 }
@@ -765,5 +820,195 @@ export function modulateReportWithSensitivity(report: StressTestReport, sensitiv
   return {
     ...report,
     projections: modulatedProjections
+  };
+}
+
+export function generateEconomicViability(municipality: string, horizons: number[]): {
+  municipalDebtRatio: GeographicSignal;
+  taxCollectionRate: GeographicSignal;
+  commercialVacancyRate: GeographicSignal;
+  businessFormationRate: GeographicSignal;
+} {
+  return {
+    municipalDebtRatio: createProceduregeographicSignal(
+      'Municipal Debt Ratio',
+      '45%',
+      '40%',
+      '52%',
+      'Municipal debt grows as infrastructure repair costs accumulate. Tax base erosion accelerates if property values decline.'
+    ),
+    taxCollectionRate: createProceduregeographicSignal(
+      'Tax Collection Rate',
+      '92%',
+      '88%',
+      '95%',
+      'Tax collection rates decline as property values fall and owners abandon properties. Climate stress accelerates this trend.'
+    ),
+    commercialVacancyRate: createProceduregeographicSignal(
+      'Commercial Vacancy Rate',
+      '8%',
+      '6%',
+      '15%',
+      'Commercial vacancy rises as businesses relocate from climate-stressed regions. Economic decline accelerates if major employers leave.'
+    ),
+    businessFormationRate: createProceduregeographicSignal(
+      'Business Formation Rate',
+      '3.2%/year',
+      '1.5%/year',
+      '4.8%/year',
+      'Business formation is driven by economic confidence and available labor. Climate stress reduces both, reducing new business startup rates.'
+    ),
+  };
+}
+
+export function generateInfrastructureResilience(municipality: string, horizons: number[]): {
+  utilitySystemAge: GeographicSignal;
+  electricalGridStress: GeographicSignal;
+  broadbandAvailability: GeographicSignal;
+  roadMaintenanceBacklog: GeographicSignal;
+} {
+  return {
+    utilitySystemAge: createProceduregeographicSignal(
+      'Utility System Age',
+      '35 years avg',
+      '28 years',
+      '42 years',
+      'Aging utility infrastructure requires increasing maintenance. Climate stress (floods, heat) accelerates degradation and failures.'
+    ),
+    electricalGridStress: createProceduregeographicSignal(
+      'Electrical Grid Stress',
+      '78% peak capacity',
+      '72%',
+      '88%',
+      'Grid stress increases with population growth and increased cooling demand from heat. Outages become more frequent as stress approaches 85%+.'
+    ),
+    broadbandAvailability: createProceduregeographicSignal(
+      'Broadband Availability',
+      '88% population covered',
+      '85%',
+      '92%',
+      'Broadband expansion depends on municipal investment. Climate disasters can disrupt service and reduce future investment as fiscal stress increases.'
+    ),
+    roadMaintenanceBacklog: createProceduregeographicSignal(
+      'Road Maintenance Backlog',
+      '$45M estimated',
+      '$35M',
+      '$65M',
+      'Road maintenance backlogs grow as municipal budgets are strained by climate adaptation. Deferred maintenance leads to rapid deterioration.'
+    ),
+  };
+}
+
+export function generateDemographicTrends(censusTract: string, horizons: number[]): {
+  netMigrationRate: GeographicSignal;
+  populationGrowth: GeographicSignal;
+  ageDistributionShift: GeographicSignal;
+  educationLevelChange: GeographicSignal;
+} {
+  return {
+    netMigrationRate: createProceduregeographicSignal(
+      'Net Migration Rate',
+      '-0.5%/year',
+      '-2.0%/year',
+      '+0.8%/year',
+      'Net migration turns negative as climate stress increases. People relocate to safer regions; this accelerates as climate impacts worsen.'
+    ),
+    populationGrowth: createProceduregeographicSignal(
+      'Population Growth',
+      '-1.2%/year',
+      '-2.5%/year',
+      '-0.1%/year',
+      'Population declines as out-migration exceeds natural increase. This compounds fiscal stress: shrinking tax base, fewer workers.'
+    ),
+    ageDistributionShift: createProceduregeographicSignal(
+      'Age Distribution Shift',
+      'Median age +1.5 years/decade',
+      '+1.0 years/decade',
+      '+2.2 years/decade',
+      'Population aging accelerates as young adults migrate away. Higher dependency ratios increase municipal service costs.'
+    ),
+    educationLevelChange: createProceduregeographicSignal(
+      'Education Level Change',
+      'Bachelor\'s degree +3.2% per decade',
+      '+1.5%',
+      '+5.0%',
+      'Education levels may rise in-place (remaining population more educated) or stagnate if out-migration is selective. Trend depends on local economy.'
+    ),
+  };
+}
+
+export function generateClimateMigration(lat: number, lng: number, horizons: number[]): {
+  climateRefugeeInflowProjection: GeographicSignal;
+  climateRefugeeOutflowProjection: GeographicSignal;
+  temperatureExposure: GeographicSignal;
+  floodExposureOfOriginRegions: GeographicSignal;
+} {
+  return {
+    climateRefugeeInflowProjection: createProceduregeographicSignal(
+      'Climate Refugee Inflow Projection',
+      '+1.2% population/decade from climate stress',
+      '+0.3%',
+      '+3.5%',
+      'Climate refugees flow toward climate havens. This region may receive refugees from hotter/wetter areas, increasing population pressure.'
+    ),
+    climateRefugeeOutflowProjection: createProceduregeographicSignal(
+      'Climate Refugee Outflow Projection',
+      '-0.8% population/decade to safer regions',
+      '-0.2%',
+      '-2.1%',
+      'Local residents leave for safer climates as hazards intensify. This compounds population decline and fiscal stress.'
+    ),
+    temperatureExposure: createProceduregeographicSignal(
+      'Temperature Exposure',
+      '+2.8°C by 2075 (vs. 2020 baseline)',
+      '+2.0°C',
+      '+3.8°C',
+      'Temperature rise drives heat stress, cooling demand, and agricultural stress. Extreme heat days increase exponentially above 2°C warming.'
+    ),
+    floodExposureOfOriginRegions: createProceduregeographicSignal(
+      'Flood Exposure of Climate Refugee Origin Regions',
+      '22% of potential origin regions face >20% flood risk by 2075',
+      '15%',
+      '35%',
+      'Rising sea levels and intense precipitation push flooding in origin regions. Flood-stressed regions send climate refugees to inland safe zones.'
+    ),
+  };
+}
+
+export function generateSocialFabric(municipality: string, horizons: number[]): {
+  civicParticipationRate: GeographicSignal;
+  communityStabilityIndex: GeographicSignal;
+  politicalAlignmentWithAdaptation: GeographicSignal;
+  resilienceNewsSentiment: GeographicSignal;
+} {
+  return {
+    civicParticipationRate: createProceduregeographicSignal(
+      'Civic Participation Rate',
+      '56% voter turnout (2020)',
+      '48%',
+      '64%',
+      'Civic participation declines with out-migration and reduced optimism. Declining participation reduces political will for climate adaptation.'
+    ),
+    communityStabilityIndex: createProceduregeographicSignal(
+      'Community Stability Index',
+      '62/100 (moderate)',
+      '45/100',
+      '75/100',
+      'Community stability depends on economic opportunity and perceived safety. Climate stress erodes both. Stability declines as out-migration accelerates.'
+    ),
+    politicalAlignmentWithAdaptation: createProceduregeographicSignal(
+      'Political Alignment with Climate Adaptation',
+      '58% population in climate-aligned districts',
+      '42%',
+      '72%',
+      'Political will for adaptation varies by district. Migration patterns shift political alignment. Without political will, adaptation investment lags.'
+    ),
+    resilienceNewsSentiment: createProceduregeographicSignal(
+      'Community Resilience News Sentiment',
+      '38% positive, 42% negative, 20% neutral',
+      '25% positive',
+      '55% positive',
+      'News sentiment reflects community perception of climate risk. Negative sentiment reduces optimism and adaptation investment. Risk spirals.'
+    ),
   };
 }
