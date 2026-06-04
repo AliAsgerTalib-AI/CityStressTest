@@ -86,6 +86,63 @@ export interface PricingPoint {
   utilityOpExIncrease: string; // e.g. "+15% OPEX"
 }
 
+export interface GeographicSignal {
+  name: string;                    // e.g. "Municipal Debt Ratio"
+  value: string;                   // e.g. "45%", "CRITICAL", "Declining"
+  uncertainty: MetricUncertainty;  // Reuse Phase 1 type
+}
+
+export interface GeographicScaleContext {
+  scale: 'neighborhood' | 'city' | 'region';
+  location: string;  // e.g. "94105", "San Francisco", "California"
+
+  // Economic Viability (4 signals)
+  economicViability: {
+    municipalDebtRatio: GeographicSignal;
+    taxCollectionRate: GeographicSignal;
+    commercialVacancyRate: GeographicSignal;
+    businessFormationRate: GeographicSignal;
+  };
+
+  // Infrastructure Resilience (4 signals)
+  infrastructureResilience: {
+    utilitySystemAge: GeographicSignal;
+    electricalGridStress: GeographicSignal;
+    broadbandAvailability: GeographicSignal;
+    roadMaintenanceBacklog: GeographicSignal;
+  };
+
+  // Demographic Trends (4 signals)
+  demographicTrends: {
+    netMigrationRate: GeographicSignal;
+    populationGrowth: GeographicSignal;
+    ageDistributionShift: GeographicSignal;
+    educationLevelChange: GeographicSignal;
+  };
+
+  // Climate Migration (4 signals)
+  climateMigration: {
+    climateRefugeeInflowProjection: GeographicSignal;
+    climateRefugeeOutflowProjection: GeographicSignal;
+    temperatureExposure: GeographicSignal;
+    floodExposureOfOriginRegions: GeographicSignal;
+  };
+
+  // Social Fabric (4 signals)
+  socialFabric: {
+    civicParticipationRate: GeographicSignal;
+    communityStabilityIndex: GeographicSignal;
+    politicalAlignmentWithAdaptation: GeographicSignal;
+    resilienceNewsSentiment: GeographicSignal;
+  };
+}
+
+export interface GeographicContext {
+  neighborhood: GeographicScaleContext;
+  city: GeographicScaleContext;
+  region: GeographicScaleContext;
+}
+
 export interface HorizonProjection {
   horizon: number; // 5, 10, 15, 20, 25, 50, 75, 100
   year: number; // e.g. 2031, 2036, ..., 2126
@@ -97,6 +154,7 @@ export interface HorizonProjection {
   specialists: Specialists;
   environmentalBaselines: EnvironmentalBaselines;
   pricingPoint: PricingPoint;
+  geographicContext?: GeographicContext;  // NEW: optional for backward compatibility
 }
 
 export interface StressTestReport {
