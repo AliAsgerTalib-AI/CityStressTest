@@ -15,7 +15,15 @@ export function useUIState(activeReport: any) {
     selectedSpecialist: state.selectedSpecialist,
     setSelectedSpecialist: (key: keyof Specialists) => dispatch({ selectedSpecialist: key }),
     activeTab: state.activeTab,
-    setActiveTab: (tab: 'readouts' | 'forecaster') => dispatch({ activeTab: tab }),
+    setActiveTab: (tab: 'readouts' | 'forecaster' | 'analysis') => dispatch({ activeTab: tab }),
     currentProjection,
+    setCurrentProjection: (projection: HorizonProjection | null) => {
+      if (projection && activeReport) {
+        const idx = activeReport.projections.findIndex((p: HorizonProjection) => p.horizon === projection.horizon);
+        if (idx >= 0) {
+          dispatch({ selectedHorizonIndex: idx });
+        }
+      }
+    },
   };
 }

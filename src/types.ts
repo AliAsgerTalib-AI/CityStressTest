@@ -8,17 +8,52 @@ export interface SpecialistVerdict {
   narrative: string;
 }
 
+export interface MetricProvenance {
+  source: string;           // e.g. "USGS", "NOAA", "Climate model ensemble", "Regional comps"
+  verified: boolean;        // true = authoritative source; false = estimated/procedural
+  uncertainty: string;      // e.g. "±2%", "±0.5°C", "±15%"
+  verificationDate?: string; // ISO format e.g. "2024-03"
+}
+
+export interface MetricUncertainty {
+  confidenceLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  lowScenario: string;       // Worst-case value
+  baselineScenario: string;  // Expected value
+  highScenario: string;      // Best-case value
+  failureChainNarrative: string; // 2-3 sentences explaining why it changes
+  provenance: MetricProvenance;
+}
+
 export interface HorizonMetrics {
   capRate: string;
+  capRateUncertainty?: MetricUncertainty;
+
   municipalDebt: string; // "STABLE", "GROWING", "CRITICAL", "DEFAULT"
+  municipalDebtUncertainty?: MetricUncertainty;
+
   foundationIntegrity: string; // e.g. "95%", "12%"
+  foundationIntegrityUncertainty?: MetricUncertainty;
+
   heatIndexDays: string; // e.g. "12 Days/Yr"
+  heatIndexDaysUncertainty?: MetricUncertainty;
+
   averageTemp: string; // e.g. "24°C"
+  averageTempUncertainty?: MetricUncertainty;
+
   wetBulbTemp: string; // e.g. "21°C"
+  wetBulbTempUncertainty?: MetricUncertainty;
+
   freshwaterStatus: string; // e.g. "SECURE", "TANK-IMPORTED"
+  freshwaterStatusUncertainty?: MetricUncertainty;
+
   localAquifer: string; // e.g. "SECURE", "SALINITY RISING", "CONTAMINATED"
+  localAquiferUncertainty?: MetricUncertainty;
+
   floodProb: string; // e.g. "12% decadal"
+  floodProbUncertainty?: MetricUncertainty;
+
   hardinessZone: string; // e.g. "10b -> 11a"
+  hardinessZoneUncertainty?: MetricUncertainty;
 }
 
 export interface Specialists {

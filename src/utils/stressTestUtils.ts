@@ -3,7 +3,52 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StressTestReport, HorizonProjection, Specialists, SpecialistVerdict } from '../types';
+import { StressTestReport, HorizonProjection, Specialists, SpecialistVerdict, MetricUncertainty, MetricProvenance } from '../types';
+
+// Helper to create LOW-confidence procedural uncertainty
+function createProceduralUncertainty(
+  baselineValue: string,
+  lowValue: string,
+  highValue: string,
+  narrative: string,
+  source: string = 'Procedural simulation'
+): MetricUncertainty {
+  return {
+    confidenceLevel: 'LOW',
+    lowScenario: lowValue,
+    baselineScenario: baselineValue,
+    highScenario: highValue,
+    failureChainNarrative: narrative,
+    provenance: {
+      source,
+      verified: false,
+      uncertainty: '±20%',
+    },
+  };
+}
+
+// Helper for MEDIUM confidence (mix of data + model)
+function createMixedUncertainty(
+  baselineValue: string,
+  lowValue: string,
+  highValue: string,
+  narrative: string,
+  source: string,
+  uncertainty: string = '±10%'
+): MetricUncertainty {
+  return {
+    confidenceLevel: 'MEDIUM',
+    lowScenario: lowValue,
+    baselineScenario: baselineValue,
+    highScenario: highValue,
+    failureChainNarrative: narrative,
+    provenance: {
+      source,
+      verified: false,
+      uncertainty,
+    },
+  };
+}
 
 function generateDynamicSpecialistNarrative(
   specialist: string,
@@ -280,17 +325,111 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
       climateZone = "Semi-Arid Coastal (BSh) → Arid (BWh)";
     }
 
+    // Extract numeric values for uncertainty calculations
+    const capRateValue = h > 50 ? "N/A" : `${(4.2 + h * 0.08).toFixed(1)}%`;
+    const municipalDebtStatus = h <= 15 ? "STABLE" : h <= 25 ? "GROWING" : h <= 50 ? "CRITICAL" : "DEFAULT";
+    const foundationIntegrityStr = foundation;
+    const heatIndexDaysStr = heatDays;
+    const heatIndexDaysNum = Math.floor(heatDaysBase + h * 0.75);
+    const avgTempStr = avgTemp;
+    const tempC = baseTemp + h * 0.048;
+    const wetBulbTempStr = wetBulb;
+    const wetBulbC = Math.min(32, baseWetBulb + h * 0.052);
+    const freshwaterStatusStr = h <= 20 ? "SECURE" : h <= 50 ? "RATIONED" : "TANK-IMPORTED";
+    const localAquiferStr = h <= 15 ? "SECURE" : h <= 50 ? "SALINITY RISING" : "DEPLETED";
+    const floodProbStr = flood;
+    const floodProbNum = Math.min(100, Math.floor(floodBase + h * floodMultiplier));
+    const hardinessZoneStr = climateZone;
+
     const metricsState = {
-      capRate: h > 50 ? "N/A" : `${(4.2 + h * 0.08).toFixed(1)}%`,
-      municipalDebt: h <= 15 ? "STABLE" : h <= 25 ? "GROWING" : h <= 50 ? "CRITICAL" : "DEFAULT",
-      foundationIntegrity: foundation,
-      heatIndexDays: heatDays,
-      averageTemp: avgTemp,
-      wetBulbTemp: wetBulb,
-      freshwaterStatus: h <= 20 ? "SECURE" : h <= 50 ? "RATIONED" : "TANK-IMPORTED",
-      localAquifer: h <= 15 ? "SECURE" : h <= 50 ? "SALINITY RISING" : "DEPLETED",
-      floodProb: flood,
-      hardinessZone: climateZone
+      capRate: capRateValue,
+      capRateUncertainty: h > 50 ? undefined : createProceduralUncertainty(
+        capRateValue,
+        `${(parseFloat(capRateValue) * 0.85).toFixed(1)}%`,
+        `${(parseFloat(capRateValue) * 1.1).toFixed(1)}%`,
+        `Cap rates adjust based on market risk perception and climate insurance costs. ` +
+        `If municipal services remain stable, rates stabilize; if infrastructure fails, rates rise sharply.`
+      ),
+
+      municipalDebt: municipalDebtStatus,
+      municipalDebtUncertainty: createProceduralUncertainty(
+        municipalDebtStatus,
+        municipalDebtStatus, // Low scenario same as baseline
+        'CRITICAL', // High scenario worse
+        `Municipal debt grows as climate adaptation and infrastructure repair costs accumulate. ` +
+        `Fiscal pressure increases if property tax base shrinks due to out-migration or devaluation.`
+      ),
+
+      foundationIntegrity: foundationIntegrityStr,
+      foundationIntegrityUncertainty: createProceduralUncertainty(
+        foundationIntegrityStr,
+        `${Math.max(5, parseFloat(foundationIntegrityStr) - 10)}%`,
+        `${Math.min(100, parseFloat(foundationIntegrityStr) + 5)}%`,
+        `Foundation integrity depends on soil stability and water table fluctuation. ` +
+        `Saltwater intrusion and subsidence accelerate degradation; proper drainage slows it.`
+      ),
+
+      heatIndexDays: heatIndexDaysStr,
+      heatIndexDaysUncertainty: createProceduralUncertainty(
+        heatIndexDaysStr,
+        `${Math.floor(heatIndexDaysNum * 0.7)} Days/Yr`,
+        `${Math.floor(heatIndexDaysNum * 1.4)} Days/Yr`,
+        `Heat index days increase as global temperatures rise and urban heat island effects intensify. ` +
+        `Local cooling strategies (vegetation, reflective surfaces) can reduce this; paved sprawl accelerates it.`
+      ),
+
+      averageTemp: avgTempStr,
+      averageTempUncertainty: createProceduralUncertainty(
+        avgTempStr,
+        `${(tempC - 0.5).toFixed(1)}°C`,
+        `${(tempC + 1.2).toFixed(1)}°C`,
+        `Average temperature rises as atmospheric CO2 accumulates. Exact warming rate depends on global emissions and regional climate feedback loops.`
+      ),
+
+      wetBulbTemp: wetBulbTempStr,
+      wetBulbTempUncertainty: createProceduralUncertainty(
+        wetBulbTempStr,
+        `${(wetBulbC - 0.3).toFixed(1)}°C`,
+        `${(wetBulbC + 0.8).toFixed(1)}°C`,
+        `Wet-bulb temperature (perceived temperature and humidity combined) increases, making outdoor work and recreation dangerous at high values. ` +
+        `Thresholds above 32°C become lethal for sustained exertion; above 35°C are dangerous for anyone.`
+      ),
+
+      freshwaterStatus: freshwaterStatusStr,
+      freshwaterStatusUncertainty: createProceduralUncertainty(
+        freshwaterStatusStr,
+        freshwaterStatusStr, // Low scenario same as baseline
+        freshwaterStatusStr === 'SECURE' ? 'TANK-IMPORTED' : 'CRITICAL',
+        `Freshwater availability depends on aquifer recharge rates and regional groundwater competition. ` +
+        `Drought, population growth, and sea level rise all reduce available freshwater; conservation policies can extend supply.`
+      ),
+
+      localAquifer: localAquiferStr,
+      localAquiferUncertainty: createProceduralUncertainty(
+        localAquiferStr,
+        localAquiferStr,
+        localAquiferStr === 'SECURE' ? 'SALINITY RISING' : 'CONTAMINATED',
+        `Aquifer salinity rises as sea level rises and coastal groundwater is pulled inland. ` +
+        `Inland aquifers face contamination from agricultural runoff and industrial activity. Salinity exceeding 2500 ppm triggers well abandonment.`
+      ),
+
+      floodProb: floodProbStr,
+      floodProbUncertainty: createProceduralUncertainty(
+        floodProbStr,
+        `${Math.max(1, Math.floor(floodProbNum * 0.6))}% decadal`,
+        `${Math.floor(floodProbNum * 1.8)}% decadal`,
+        `Flood probability increases with sea level rise (+${h / 20}cm by ${2026 + h}) and intensified storm rainfall. ` +
+        `Compound events (high tide + storm surge + rainfall) become more likely. Coastal protection investments can reduce this risk locally.`
+      ),
+
+      hardinessZone: hardinessZoneStr,
+      hardinessZoneUncertainty: createProceduralUncertainty(
+        hardinessZoneStr,
+        hardinessZoneStr, // Low scenario same
+        hardinessZoneStr, // High scenario same (zone shifts are gradual)
+        `USDA hardiness zones shift as temperature increases. Zones move approximately 100 miles north per 1°C warming. ` +
+        `This affects which plants/trees survive; species adapted to cooler zones may fail.`
+      ),
     };
 
     let microBio = isCoastal

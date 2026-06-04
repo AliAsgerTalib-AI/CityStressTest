@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import { StressTestReport } from "./src/types.js";
+import { generateProceduralReport } from "./src/utils/stressTestUtils.js";
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || "3000", 10);
 
 app.use(express.json());
 
@@ -70,19 +71,37 @@ app.post("/api/stress-test", async (req, res) => {
     return;
   }
 
-  let ai: GoogleGenAI;
+  let ai: GoogleGenAI | null = null;
+  let useProceduralFallback = false;
+
   try {
     ai = getGeminiClient();
   } catch (error: any) {
     console.error("Gemini API not available:", error.message);
-    res.status(503).json({
-      error: error.message,
-      hint: "Gemini API key is required. Set VITE_GEMINI_API_KEY in environment variables.",
-    });
-    return;
+    console.log("Falling back to procedural report generation...");
+    useProceduralFallback = true;
   }
 
   try {
+    // If no API is available, use procedural fallback
+    if (useProceduralFallback || !ai) {
+      console.log(`Generating procedural report for [${address}] (Gemini API not available)...`);
+      const proceduralReport = generateProceduralReport(address);
+      proceduralReport.dataQuality = "ESTIMATED";
+      proceduralReport.baselinePriceNote =
+        "Property price estimated via procedural simulation. Real-time data not available.";
+
+      console.log(
+        `Successfully generated procedural stress test report for [${address}].`,
+      );
+      res.json({
+        report: proceduralReport,
+        source: "ESTIMATED",
+        dataQuality: "ESTIMATED",
+      });
+      return;
+    }
+
     console.log(
       `Fetching live climate data from Gemini API with Google Search Grounding for [${address}]...`,
     );
@@ -110,8 +129,8 @@ Use Google Search to find: current property prices, climate data, flood history,
 ADDITIONAL REQUIREMENTS:
 
 1. CONFIDENCE LEVELS
-Add to each specialist verdict: confidence level (Low, Medium, High)
-Example: verdict "WATCH", confidence "High"
+Add to each specialist verdict: confidence level (LOW, MEDIUM, HIGH)
+Example: verdict "WATCH", confidence "HIGH"
 
 2. RISK SCORING
 - Per specialist: 1-10 risk score (1=low, 10=critical)
@@ -134,6 +153,31 @@ Example: "Top 15% climate risk for coastal properties" or "Municipal debt worse 
 
 6. TOP RISKS
 - Identify 3 highest-risk specialists per horizon with their risk scores
+
+7. UNCERTAINTY DATA FOR EACH METRIC
+For EACH metric in EACH horizon, provide confidence level, three-scenario projections, and failure chain narrative:
+
+CONFIDENCE LEVELS (choose one for each metric):
+- HIGH: Data from authoritative government/research source (USGS, NOAA, IPCC, etc.) with peer-reviewed validation or recent official surveys
+- MEDIUM: Mix of verified baseline data + climate/economic models; or sparse recent government data with regional estimates
+- LOW: Mostly procedural estimation, regional comps without direct data, or highly speculative models
+
+THREE-SCENARIO PROJECTIONS (for each metric):
+- lowScenario: Conservative worst-case plausible value (e.g., "8% decadal" for flood probability)
+- baselineScenario: Expected outcome based on current trends (matches the metric value you report)
+- highScenario: Optimistic best-case plausible value (e.g., "18% decadal")
+For categorical metrics (e.g., municipalDebt, freshwaterStatus), provide three plausible categorical scenarios within the enum values. Example: for municipalDebt, lowScenario='STABLE', baselineScenario='GROWING', highScenario='CRITICAL'. Do not mix types.
+
+FAILURE CHAIN NARRATIVES (2-3 sentences for each metric):
+- Explain the SEQUENCE of physical/economic/social events causing this metric to change
+- Reference specific tipping points with years (e.g., "aquifer salinity exceeds 4000 ppm in 2038, triggering insurance withdrawal by 2040")
+- Be specific to the location; avoid generic statements
+- Example: "Aquifer depletion forces freshwater into coastal layer. Saltwater intrusion accelerates because sea level rise (+18cm by 2060) reduces freshwater pressure. By 2045, well salinity exceeds 2500 ppm threshold."
+
+DATA PROVENANCE (for each metric):
+- source: Name the data source (e.g., "USGS groundwater database", "NOAA climate model", "Regional tax assessor")
+- verified: true if from authoritative source; false if estimated/procedural
+- uncertainty: Margin of error (e.g., "±2%", "±0.5°C", "±15%", "Unknown")
 
 RESPONSE FORMAT:
 
@@ -175,18 +219,99 @@ Return valid JSON only (no markdown). Include all fields below:
       },
       "metrics": {
         "capRate": "4.5%",
+        "capRateUncertainty": {
+          "confidenceLevel": "MEDIUM",
+          "lowScenario": "3.8%",
+          "baselineScenario": "4.5%",
+          "highScenario": "5.2%",
+          "failureChainNarrative": "Cap rates rise as insurance costs increase and climate risk reduces demand. Rising property taxes due to infrastructure repairs accelerate the decline. By 2040, cap rates exceed 6%, making investment unviable.",
+          "provenance": { "source": "Regional comps", "verified": false, "uncertainty": "±0.5%", "verificationDate": "2024-06" }
+        },
         "municipalDebt": "STABLE|GROWING|CRITICAL|DEFAULT",
+        "municipalDebtUncertainty": {
+          "confidenceLevel": "HIGH",
+          "lowScenario": "STABLE",
+          "baselineScenario": "GROWING",
+          "highScenario": "CRITICAL",
+          "failureChainNarrative": "Municipal debt grows as infrastructure repair costs rise from climate impacts. Bond rating downgrades reduce borrowing capacity. By 2045, debt service exceeds 25% of budget.",
+          "provenance": { "source": "GFOA bond audit", "verified": true, "uncertainty": "±5%", "verificationDate": "2024-05" }
+        },
         "foundationIntegrity": "95%",
+        "foundationIntegrityUncertainty": {
+          "confidenceLevel": "MEDIUM",
+          "lowScenario": "85%",
+          "baselineScenario": "95%",
+          "highScenario": "98%",
+          "failureChainNarrative": "Foundation integrity declines due to water intrusion and soil expansion. Increased groundwater levels from climate change weaken bearing capacity. Structural failure risk increases after 2035.",
+          "provenance": { "source": "Local engineering surveys", "verified": false, "uncertainty": "±8%", "verificationDate": "2023" }
+        },
         "heatIndexDays": "15 Days/Yr",
+        "heatIndexDaysUncertainty": {
+          "confidenceLevel": "HIGH",
+          "lowScenario": "12 Days/Yr",
+          "baselineScenario": "15 Days/Yr",
+          "highScenario": "22 Days/Yr",
+          "failureChainNarrative": "Heat index days increase due to rising temperatures and urban heat island effect. By 2050, extreme heat events become a health emergency. Cooling costs escalate, driving occupancy decline.",
+          "provenance": { "source": "NOAA climate model", "verified": true, "uncertainty": "±3 days", "verificationDate": "2024" }
+        },
         "averageTemp": "25°C",
+        "averageTempUncertainty": {
+          "confidenceLevel": "HIGH",
+          "lowScenario": "24.5°C",
+          "baselineScenario": "25°C",
+          "highScenario": "26°C",
+          "failureChainNarrative": "Average temperature rises by 1-2°C by 2050. This accelerates permafrost melt and changes precipitation patterns. Seasonal shifts disrupt local agriculture and ecosystems.",
+          "provenance": { "source": "IPCC climate model ensemble", "verified": true, "uncertainty": "±0.5°C", "verificationDate": "2024" }
+        },
         "wetBulbTemp": "22°C",
+        "wetBulbTempUncertainty": {
+          "confidenceLevel": "MEDIUM",
+          "lowScenario": "21°C",
+          "baselineScenario": "22°C",
+          "highScenario": "24°C",
+          "failureChainNarrative": "Wet-bulb temperatures increase, making outdoor activity impossible in summer. Heat-related mortality rises. Migration accelerates in the 2040s as habitability declines.",
+          "provenance": { "source": "Regional climate model", "verified": false, "uncertainty": "±1°C", "verificationDate": "2024" }
+        },
         "freshwaterStatus": "SECURE|RATIONED",
+        "freshwaterStatusUncertainty": {
+          "confidenceLevel": "HIGH",
+          "lowScenario": "SECURE",
+          "baselineScenario": "RATIONED",
+          "highScenario": "CRITICAL",
+          "failureChainNarrative": "Freshwater transitions from secure to rationed by 2035 due to drought and aquifer depletion. Rationing intensifies in 2045. By 2055, restrictions limit residential use.",
+          "provenance": { "source": "USGS groundwater database", "verified": true, "uncertainty": "±3 years", "verificationDate": "2024" }
+        },
         "localAquifer": "STABLE|RISING SALINITY|DEPLETED",
-        "floodProb": "18% Decadal",
-        "hardinessZone": "10b → 11a"
+        "localAquiferUncertainty": {
+          "confidenceLevel": "MEDIUM",
+          "lowScenario": "STABLE",
+          "baselineScenario": "RISING SALINITY",
+          "highScenario": "DEPLETED",
+          "failureChainNarrative": "Aquifer salinity increases due to sea level rise reducing freshwater pressure. Saltwater intrusion accelerates after 2038. By 2050, salinity exceeds drinking water standards (2500 ppm).",
+          "provenance": { "source": "Coastal aquifer monitoring", "verified": false, "uncertainty": "±500 ppm", "verificationDate": "2024" }
+        },
+        "floodProb": "12% Decadal",
+        "floodProbUncertainty": {
+          "confidenceLevel": "HIGH",
+          "lowScenario": "8% Decadal",
+          "baselineScenario": "12% Decadal",
+          "highScenario": "18% Decadal",
+          "failureChainNarrative": "Flood probability increases due to sea level rise (+18cm by 2060) and increased storm intensity. Storm surge protection fails after 2045. By 2050, 1-in-10-year events become 1-in-5-year.",
+          "provenance": { "source": "NOAA flood hazard model", "verified": true, "uncertainty": "±4%", "verificationDate": "2024" }
+        },
+        "hardinessZone": "10b → 11a",
+        "hardinessZoneUncertainty": {
+          "confidenceLevel": "MEDIUM",
+          "lowScenario": "10b → 11a",
+          "baselineScenario": "10b → 11a",
+          "highScenario": "10b → 12a",
+          "failureChainNarrative": "Hardiness zone shifts 1-2 zones warmer by 2050. Cold-intolerant plants thrive. Frost dates shift, disrupting local agriculture. Invasive species colonize the region.",
+          "provenance": { "source": "USDA hardiness update", "verified": true, "uncertainty": "±0.5 zone", "verificationDate": "2024" }
+        }
       },
       "specialists": {
-        "macroEconomist": { "verdict": "BULLISH|STABLE|WATCH|BEARISH|DIVEST", "confidence": "High", "riskScore": 5, "narrative": "1-sentence assessment", "criticalDate": "2050", "comparativeContext": "property value decline below national average" },
+        "macroEconomist": { "verdict": "BULLISH|STABLE|WATCH|BEARISH|DIVEST", "confidence": "HIGH", "riskScore": 5, "narrative": "1-sentence assessment", "criticalDate": "2050", "comparativeContext": "property value decline below national average" },
+        "insuranceActuary": { "verdict": "BEARISH", "confidence": "HIGH", "riskScore": 8.2, "narrative": "Insurance availability will be severely constrained. Premiums will rise 15-25% annually as climate risk concentrates. By 2040, standard homeowners insurance becomes unavailable; only specialty insurers remain at 2-3x costs.", "comparativeContext": "Similar coastal properties 20 miles south already see 40% of the market uninsurable." },
         "zoningAttorney": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "municipalPolicy": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "structuralEngineer": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
@@ -195,7 +320,6 @@ Return valid JSON only (no markdown). Include all fields below:
         "demographicMigration": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "geopoliticalAnalyst": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "environmentalSpecialist": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
-        "insuranceActuary": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "gridUtilityEngineer": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "publicHealthEpidemiologist": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." },
         "socialSentiment": { "verdict": "...", "confidence": "...", "riskScore": ..., "narrative": "...", "comparativeContext": "..." }
