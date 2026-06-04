@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -513,12 +513,13 @@ async function initializeServer() {
     app.use(vite.middlewares);
     console.log("Vite development server middleware mounted.");
   } else {
+    // In production, serve static files from dist directory
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
-    console.log("Production static build servers mounted.");
+    console.log(`Production static build mounted from ${distPath}`);
   }
 
   app.listen(PORT, '0.0.0.0', () => {
