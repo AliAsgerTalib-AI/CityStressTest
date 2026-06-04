@@ -17,12 +17,22 @@ import {
   generateInfrastructureResilience,
   generateDemographicTrends,
 } from "./src/utils/stressTestUtils.js";
+import { apiCacheManager } from "./src/utils/ApiCacheManager.js";
+import { EconomicViabilityProvider } from "./src/utils/providers/EconomicViabilityProvider.js";
+import { DemographicTrendsProvider } from "./src/utils/providers/DemographicTrendsProvider.js";
+import { InfrastructureResilienceProvider } from "./src/utils/providers/InfrastructureResilienceProvider.js";
 
 dotenv.config();
 
 // Manage __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Initialize providers for geographic context API
+const censusApiKey = process.env.CENSUS_API_KEY || '';
+const economicViabilityProvider = new EconomicViabilityProvider(censusApiKey);
+const demographicTrendsProvider = new DemographicTrendsProvider(censusApiKey);
+const infrastructureResilienceProvider = new InfrastructureResilienceProvider();
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "3000", 10);
@@ -553,6 +563,36 @@ async function fetchSocialFabric(
   };
 }
 
+// Helper functions for geographic context merging
+function mergeResults(
+  econ: any,
+  demo: any,
+  infra: any,
+  scale: 'city' | 'region',
+): any {
+  if (!econ && !demo && !infra) return null;
+
+  const result: any = {
+    scale,
+    location: econ?.location || demo?.location || infra?.location || '',
+    economicViability: econ?.economicViability || {},
+    demographicTrends: demo?.demographicTrends || {},
+    infrastructureResilience: infra?.infrastructureResilience || {},
+  };
+
+  return result;
+}
+
+async function mergeRegionResults(state: string): Promise<any> {
+  const [econ, demo, infra] = await Promise.all([
+    economicViabilityProvider.fetchRegion(state),
+    demographicTrendsProvider.fetchRegion(state),
+    infrastructureResilienceProvider.fetchRegion(state),
+  ]);
+
+  return mergeResults(econ, demo, infra, 'region');
+}
+
 // API endpoint for climate stress-testing
 app.post("/api/stress-test", async (req, res) => {
   const { address } = req.body;
@@ -954,6 +994,46 @@ Return valid JSON only (no markdown). Include all fields below:
       details: error.message || String(error),
       hint: "The Gemini API request failed. Check your API key and try again.",
     });
+  }
+});
+
+// API endpoint for geographic context (city and region data integration)
+app.get("/api/geographic-context/:city/:state", async (req, res) => {
+  try {
+    const { city, state } = req.params;
+    const cacheKey = `${city}_${state}`;
+
+    // Check in-memory cache
+    const cached = apiCacheManager.get(cacheKey);
+    if (cached) {
+      console.log(`Geographic context cache hit for ${cacheKey}`);
+      res.json(cached);
+      return;
+    }
+
+    console.log(`Fetching geographic context for ${city}, ${state}...`);
+
+    // Fetch from providers in parallel
+    const [econ, demo, infra] = await Promise.all([
+      economicViabilityProvider.fetchCity(city, state),
+      demographicTrendsProvider.fetchCity(city, state),
+      infrastructureResilienceProvider.fetchCity(city, state),
+    ]);
+
+    // Merge results: combine non-empty signals from all providers
+    const merged = {
+      city: mergeResults(econ, demo, infra, 'city'),
+      region: await mergeRegionResults(state),
+    };
+
+    // Cache result
+    apiCacheManager.set(cacheKey, merged);
+
+    console.log(`Successfully generated geographic context for ${city}, ${state}`);
+    res.json(merged);
+  } catch (error) {
+    console.error('Error fetching geographic context:', error);
+    res.status(500).json({ error: 'Geographic data unavailable' });
   }
 });
 
