@@ -7,14 +7,8 @@
     "VITE_GEMINI_MODEL": "@GEMINI_MODEL"
   },
   "functions": {
-    "api/**/*.ts": {
+    "dist/server.cjs": {
       "runtime": "nodejs20.x"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ]
+  }
 }
