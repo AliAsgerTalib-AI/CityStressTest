@@ -257,23 +257,10 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
     startPrice = 850000;
     transitionDecade = "2060s";
     transitionCause = "Severe storm-induced mudslides, repeated super typhoon damage to building structural basements, and steep premium hikes.";
-  } else if (norm.includes("lahore")) {
-    locationName = "Lahore Metropolitan Area, Punjab, Pakistan";
-    coordinates = "31.5204° N, 74.3587° E";
-    startPrice = 0; // No verified market data available for Pakistani real estate
-    transitionDecade = "2055s";
-    transitionCause = "Extreme heat waves exceeding wet-bulb limits, groundwater depletion, and monsoon intensification creating compounded climate stress on water security and urban habitability.";
-  } else if (norm.includes("karachi")) {
+  } else if (norm.includes("karachi") || norm.includes("pakistan")) {
     locationName = "Karachi Metropolitan Area, Sindh, Pakistan";
     coordinates = "24.8607° N, 67.0011° E";
     startPrice = 0; // No verified market data available for Pakistani real estate
-    transitionDecade = "2050s";
-    transitionCause = "Severe monsoon-driven flooding, coupled with sea-level rise inundating coastal infrastructure and urban water systems. Aquifer salinization renders freshwater resources non-viable.";
-  } else if (norm.includes("pakistan")) {
-    // Default Pakistan location (use Karachi as fallback)
-    locationName = "Karachi Metropolitan Area, Sindh, Pakistan";
-    coordinates = "24.8607° N, 67.0011° E";
-    startPrice = 0;
     transitionDecade = "2050s";
     transitionCause = "Severe monsoon-driven flooding, coupled with sea-level rise inundating coastal infrastructure and urban water systems. Aquifer salinization renders freshwater resources non-viable.";
   } else {
@@ -345,18 +332,14 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
 
     // Climate Metrics - location-specific
     let baseTemp = isDesert ? 38.5 : isCoastal ? 27.2 : 21.0;
-    if (norm.includes("lahore")) {
-      baseTemp = 24.6; // Lahore averages 24-25°C annually, summer peaks to 45+°C
-    } else if (norm.includes("karachi") || norm.includes("pakistan")) {
+    if (norm.includes("karachi") || norm.includes("pakistan")) {
       baseTemp = 28.2; // Karachi averages 28-29°C, with summer peaks to 40+°C
     }
     const avgTemp = `${(baseTemp + h * 0.048).toFixed(1)}°C`;
 
     // Wet-bulb temperature - location-specific
     let baseWetBulb = 16.5;
-    if (norm.includes("lahore")) {
-      baseWetBulb = 21.5; // Lahore monsoon wet-bulb peaks at 25-28°C; continental climate
-    } else if (norm.includes("karachi") || norm.includes("pakistan")) {
+    if (norm.includes("karachi") || norm.includes("pakistan")) {
       baseWetBulb = 25.0; // Karachi monsoon wet-bulb peaks at 28-30°C; avg is high
     } else if (norm.includes("mumbai") || norm.includes("india")) {
       baseWetBulb = 27.5; // Mumbai tropical monsoon peaks at ~28-29°C
@@ -369,9 +352,7 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
 
     // Heat index days - Karachi has 50+ extreme heat days/year
     let heatDaysBase = isDesert ? 45 : isCoastal ? 14 : 4;
-    if (norm.includes("lahore")) {
-      heatDaysBase = 48; // Lahore experiences 45-50 days of extreme heat annually
-    } else if (norm.includes("karachi") || norm.includes("pakistan")) {
+    if (norm.includes("karachi") || norm.includes("pakistan")) {
       heatDaysBase = 52; // Karachi experiences 50+ days of extreme heat annually
     }
     const heatDays = `${Math.floor(heatDaysBase + h * 0.75)} Days/Yr`;
@@ -381,9 +362,7 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
     // Flood probability - Karachi has severe monsoon flooding risk
     let floodBase = isCoastal ? 8 : 3;
     let floodMultiplier = isCoastal ? 0.88 : 0.35;
-    if (norm.includes("lahore")) {
-      floodBase = 12; // Lahore has monsoon and riverine flood risk, less severe than Karachi
-    } else if (norm.includes("karachi") || norm.includes("pakistan")) {
+    if (norm.includes("karachi") || norm.includes("pakistan")) {
       floodBase = 15; // Karachi has documented major floods (2010: 20% of city, 2022: severe)
       floodMultiplier = 1.2; // Higher escalation due to monsoon risk
     }
@@ -396,9 +375,7 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
     if (norm.includes("mumbai") || norm.includes("india")) {
       // Mumbai is tropical monsoon (Köppen: Aw) - using descriptive classification instead of USDA hardiness
       climateZone = "Tropical Monsoon (Aw) → Arid (BSh)";
-    } else if (norm.includes("lahore")) {
-      // Lahore is humid subtropical with monsoon influence (Köppen: Cwa) - continental variant
-    } else if (norm.includes("karachi")) {
+    } else if (norm.includes("karachi") || norm.includes("pakistan")) {
       // Karachi is semi-arid with monsoon influence (Köppen: BSh/Csa) - coastal variant
       climateZone = "Semi-Arid Coastal (BSh) → Arid (BWh)";
     }
@@ -514,9 +491,7 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
       ? "Increasing coastal salinity alters native brackish marshes, leading to loss of mangrove filtration buffers."
       : "Sustained high summer dry indexes stress native vegetation, expanding regional brush fire boundaries significantly.";
 
-    if (norm.includes("lahore")) {
-      microBio = "Lahore's riverine ecosystem and agricultural plains face water stress and salinization. Native migratory bird populations threatened by habitat loss and pollution; invasive species colonize degraded wetlands.";
-    } else if (norm.includes("karachi") || norm.includes("pakistan")) {
+    if (norm.includes("karachi") || norm.includes("pakistan")) {
       microBio = "Mangrove forests in Karachi's deltas face saline intrusion and erosion. Native avifauna and marine species face habitat loss; invasive species proliferate in disturbed wetlands.";
     }
 
@@ -524,9 +499,7 @@ export function generateProceduralReport(rawLocation: string): StressTestReport 
       ? "Low-lying tidal shelf is subject to combined spring high tide surges and frequent coastal pluvial backflows."
       : "Structural soil subsidence occurs due to rapid seasonal soil moisture dry-out, destabilizing building concrete piles.";
 
-    if (norm.includes("lahore")) {
-      geoHazard = "Lahore faces monsoon flooding (July-September with intense precipitation) and riverine overflow from Ravi River. Urban flooding disrupts low-lying neighborhoods. Heat extremes (45°C+) degrade urban infrastructure and water quality.";
-    } else if (norm.includes("karachi") || norm.includes("pakistan")) {
+    if (norm.includes("karachi") || norm.includes("pakistan")) {
       geoHazard = "Karachi faces compound monsoon flooding (June-September with 100+ mm rainfall events) and cyclonic storm surge. Low-lying coastal areas vulnerable to 1-2m inundation. Urban drainage systems regularly overwhelmed.";
     }
 
