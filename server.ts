@@ -1358,9 +1358,9 @@ async function initializeServer() {
     console.log(`Production static build mounted from ${distPath}`);
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, () => {
     console.log(
-      `Sovereign Wealth Board backend active on http://0.0.0.0:${PORT}`,
+      `Sovereign Wealth Board backend active on port ${PORT}`,
     );
   });
 }
