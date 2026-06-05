@@ -1,7 +1,7 @@
 import { Handler } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
 import NodeGeocoder from 'node-geocoder';
-import crypto from 'crypto';
+import { createHash } from 'crypto';
 import dotenv from 'dotenv';
 import { StressTestReport, GeographicContext } from '../src/types';
 import {
@@ -75,7 +75,7 @@ async function reverseGeocodeAddress(address: string): Promise<GeocodeResult> {
       );
     }
 
-    const hash = crypto.createHash('md5').update(address).digest('hex');
+    const hash = createHash('md5').update(address).digest('hex');
     const censusTract = hash.substring(0, 11).padStart(11, '0');
 
     return {
