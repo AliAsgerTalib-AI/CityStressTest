@@ -1,9 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "npm run build",
-  "env": {
-    "VITE_GEMINI_API_KEY": "@GEMINI_API_KEY",
-    "VITE_GEMINI_MODEL": "@GEMINI_MODEL",
-    "NODE_ENV": "production"
-  }
-}
