@@ -1,3 +1,25 @@
+function parseBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on('end', () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch (e) {
+        resolve({});
+      }
+    });
+
+    req.on('error', (err) => {
+      reject(err);
+    });
+  });
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
@@ -7,14 +29,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    let body = '';
-
-    // Parse request body from stream
-    for await (const chunk of req) {
-      body += chunk;
-    }
-
-    const data = body ? JSON.parse(body) : {};
+    const data = await parseBody(req);
     const { address } = data;
 
     if (!address) {
