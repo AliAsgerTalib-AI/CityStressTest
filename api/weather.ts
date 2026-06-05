@@ -1,4 +1,4 @@
-import { Handler } from '@vercel/node';
+import type { IncomingMessage, ServerResponse } from 'http';
 
 async function geocodeAddress(
   address: string,
@@ -72,7 +72,7 @@ async function geocodeAddress(
   return { lat: 40.7128, lon: -74.006, name: address };
 }
 
-const handler: Handler = async (req, res) => {
+const handler = async (req: IncomingMessage & { query?: any }, res: ServerResponse) => {
   const { location, lat, lon } = req.query;
 
   try {

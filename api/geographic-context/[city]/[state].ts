@@ -1,4 +1,4 @@
-import { Handler } from '@vercel/node';
+import type { IncomingMessage, ServerResponse } from 'http';
 import { apiCacheManager } from '../../../src/utils/ApiCacheManager';
 import {
   generateEconomicViability,
@@ -43,7 +43,7 @@ async function mergeRegionResults(state: string): Promise<any> {
   return mergeResults(econ, demo, infra, 'region');
 }
 
-const handler: Handler = async (req, res) => {
+const handler = async (req: IncomingMessage & { query?: any }, res: ServerResponse) => {
   try {
     const { city, state } = req.query;
 

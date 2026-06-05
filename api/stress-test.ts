@@ -1,4 +1,4 @@
-import { Handler } from '@vercel/node';
+import type { IncomingMessage, ServerResponse } from 'http';
 import { GoogleGenAI } from '@google/genai';
 import NodeGeocoder from 'node-geocoder';
 import { createHash } from 'crypto';
@@ -354,7 +354,7 @@ async function fetchDemographicTrends(
   };
 }
 
-const handler: Handler = async (req, res) => {
+const handler = async (req: IncomingMessage & { body?: any }, res: ServerResponse) => {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
